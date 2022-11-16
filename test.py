@@ -1,19 +1,16 @@
 from value import Value
 
 
-a = Value(2.0, "a")
-b = Value(-3.0, "b")
-c = Value(10.0, "c")
-f = Value(-2.0, "f")
+x1 = Value(2.0, "x1")
+w1 = Value(-3.0, "w1")
+x2 = Value(0.0, "x2")
+w2 = Value(1.0, "w2")
 
-e = a * b; e.label = "e"
-d = e + c; d.label = "d"
-L = d * f; L.label = "L"
+b = Value(6.8813735870195432, "b")
 
-L.print_debug_representation()
+o = (x1 * w1 + x2 * w2 + b).tanh()
 
-L.grad = 1
-L.back_propagate_gradient_to_inputs()
-print(f"a.grad: {a.grad}")
-
-
+o.grad = 1
+o.back_propagate_gradient_to_inputs()
+o.print_debug_representation()
+# print(f"w1.grad: {w1.grad}")

@@ -1,3 +1,4 @@
+from math import e
 from typing import Callable, Optional, Tuple, Union
 
 
@@ -8,7 +9,6 @@ class Value:
             label: Optional[str] = None,
             _inputs: Tuple["Value", ...] = (),
             _input_operation: Optional[str] = None,
-            _back_propagate_to_inputs: Optional[Callable] = None
     ):
         self.data = data
         self.label = label
@@ -16,13 +16,30 @@ class Value:
 
         self.inputs = _inputs
         self.input_operation = _input_operation
-        self._back_propagate_gradient_to_inputs = _back_propagate_to_inputs
+
+        self._back_propagate_gradient_to_inputs = None
+
+        if self.label is None:
+            self.label = self._construct_default_label()
+
+    def _construct_default_label(self) -> Optional[str]:
+        if self.inputs is None or self.input_operation is None:
+            return None
+
+        input_labels = [input_value.label for input_value in self.inputs]
+        if None in input_labels:
+            return None
+
+        if len(input_labels) > 1:
+            return self.input_operation.join(input_labels)
+        else:
+            return f"{self.input_operation}({input_labels[0]})"
 
     def __repr__(self):
         if self.label is not None:
-            return f"[value {self.label}: {self.data}]"
+            return f"[{self.label}|data {self.data}|grad {self.grad}]"
         else:
-            return f"[value: {self.data}]"
+            return f"[data {self.data}|grad {self.grad}]"
 
     #
     # Operations
@@ -52,6 +69,16 @@ class Value:
 
         return out_value
 
+    def tanh(self):
+        x = self.data
+        out_data = (e ** (2.0 * x) - 1) / (e ** (2.0 * x) + 1)
+        out_value = Value(out_data, _inputs=(self, ), _input_operation="tanh")
+
+        def backwards():
+            self.grad = 1.0 - out_data ** 2
+        out_value._back_propagate_gradient_to_inputs = backwards
+
+        return out_value
 
     #
     # Backprop
