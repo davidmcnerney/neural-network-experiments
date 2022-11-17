@@ -13,4 +13,3 @@ o = (x1 * w1 + x2 * w2 + b).tanh()
 o.grad = 1
 o.back_propagate_gradient_to_inputs()
 o.print_debug_representation()
-# print(f"w1.grad: {w1.grad}")

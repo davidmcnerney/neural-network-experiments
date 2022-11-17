@@ -47,7 +47,7 @@ class Value:
 
     def __add__(self, other):
         if not isinstance(other, Value):
-            raise Exception(f"Cannot add {type(other)} to a Value")
+            other = Value(other)
         out_value = Value(data=(self.data + other.data), _inputs=(self, other,), _input_operation="+")
 
         def backwards():
@@ -59,7 +59,7 @@ class Value:
 
     def __mul__(self, other):
         if not isinstance(other, Value):
-            raise Exception(f"Cannot add {type(other)} to a Value")
+            other = Value(other)
         out_value = Value(data=(self.data * other.data), _inputs=(self, other,), _input_operation="*")
 
         def backwards():
