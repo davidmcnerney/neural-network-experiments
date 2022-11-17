@@ -51,8 +51,23 @@ class Value:
         out_value = Value(data=(self.data + other.data), _inputs=(self, other,), _input_operation="+")
 
         def backwards():
-            self.grad = out_value.grad
-            other.grad = out_value.grad
+            self.grad += out_value.grad
+            other.grad += out_value.grad
+        out_value._back_propagate_gradient_to_inputs = backwards
+
+        return out_value
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __sub__(self, other):
+        if not isinstance(other, Value):
+            other = Value(other)
+        out_value = Value(data=(self.data - other.data), _inputs=(self, other,), _input_operation="-")
+
+        def backwards():
+            self.grad += out_value.grad
+            other.grad += out_value.grad
         out_value._back_propagate_gradient_to_inputs = backwards
 
         return out_value
@@ -63,8 +78,19 @@ class Value:
         out_value = Value(data=(self.data * other.data), _inputs=(self, other,), _input_operation="*")
 
         def backwards():
-            self.grad = other.data * out_value.grad
-            other.grad = self.data * out_value.grad
+            self.grad += other.data * out_value.grad
+            other.grad += self.data * out_value.grad
+        out_value._back_propagate_gradient_to_inputs = backwards
+
+        return out_value
+
+    def __pow__(self, other):
+        if not isinstance(other, int) or isinstance(other, float):
+            raise Exception("Expected integer or float for ** power")
+        out_value = Value(data=(self.data ** other), _inputs=(self,), _input_operation=f"**{other}")
+
+        def backwards():
+            self.grad += other * self.data ** (other - 1) * out_value.grad
         out_value._back_propagate_gradient_to_inputs = backwards
 
         return out_value
@@ -75,7 +101,7 @@ class Value:
         out_value = Value(out_data, _inputs=(self, ), _input_operation="tanh")
 
         def backwards():
-            self.grad = 1.0 - out_data ** 2
+            self.grad += 1.0 - out_data ** 2
         out_value._back_propagate_gradient_to_inputs = backwards
 
         return out_value
@@ -83,6 +109,11 @@ class Value:
     #
     # Backprop
     #
+
+    def zero_gradient(self):
+        self.grad = 0
+        for input_value in self.inputs:
+            input_value.zero_gradient()
 
     def back_propagate_gradient_to_inputs(self):
         if self._back_propagate_gradient_to_inputs is not None:
