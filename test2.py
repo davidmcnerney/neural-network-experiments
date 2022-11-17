@@ -7,4 +7,6 @@ training_data = [
 # Forward pass
 mlp = MultiLayerPerceptron(3, [4, 4, 1])
 o = mlp.execute(training_data[0][0])
-o[0].print_debug_representation()
+# o[0].print_debug_representation()
+print(len(mlp.parameters()))
+print(mlp.parameters())
