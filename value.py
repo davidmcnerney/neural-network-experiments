@@ -67,7 +67,7 @@ class Value:
 
         def backwards():
             self.grad += out_value.grad
-            other.grad += out_value.grad
+            other.grad += -1.0 * out_value.grad
         out_value._back_propagate_gradient_to_inputs = backwards
 
         return out_value
@@ -101,7 +101,7 @@ class Value:
         out_value = Value(out_data, _inputs=(self, ), _input_operation="tanh")
 
         def backwards():
-            self.grad += 1.0 - out_data ** 2
+            self.grad += (1.0 - out_data ** 2) * out_value.grad
         out_value._back_propagate_gradient_to_inputs = backwards
 
         return out_value
@@ -123,7 +123,6 @@ class Value:
         else:
             if len(self.inputs) > 0:
                 raise Exception(f"No back propagation closure available in {self}, but it has inputs. Unexpected.")
-
 
     #
     # Debug utilities
