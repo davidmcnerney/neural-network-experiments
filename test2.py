@@ -15,7 +15,7 @@ expected_outputs: List[Value] = [Value(training_data[1]) for training_data in tr
 
 mlp = MultiLayerPerceptron(3, [4, 4, 1])
 
-for i in range(1, 1000+1):
+for i in range(1, 200+1):
     # Forward pass
     actual_outputs: List[Value] = [
         mlp.execute(training_input)[0]
@@ -30,4 +30,4 @@ for i in range(1, 1000+1):
     loss.grad = 1.0
     loss.back_propagate_gradient_to_inputs()
     for parameter in mlp.parameters():
-        parameter.data += -0.2 * parameter.grad
+        parameter.data += -0.1 * parameter.grad
