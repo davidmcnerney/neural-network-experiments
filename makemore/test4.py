@@ -10,6 +10,7 @@ from torch.nn import functional as F
 # Hyperparameters etc
 BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
+LAYER_1_COUNT_NEURONS = 100
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -77,13 +78,29 @@ Y_test = torch.tensor(ys_test)
 
 # Initial lookup matrix
 # Maps character code one-hot vectors to vectors of CHARACTER_DIMENSIONS size
+# Each row N is the vector for character N, so you can directly index as well
 C = torch.randn((len(chars), CHARACTER_DIMENSIONS)).float()
 
-#
+# Layer 1
+# Maps the combined character vectors for the characters in the preceding block to vector containing one output
+# float per neuron
+W1 = torch.randn(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS)
+b1 = torch.randn(LAYER_1_COUNT_NEURONS)
+
+# Layer 2
+# Maps layer 1 output to probability vector of size len(chars)
+
 
 # Forward pass
 C_out = C[X]
 print(f"C_out: {C_out.shape}")
+# C_out is a 3 dimensional tensor of size len(X) x BLOCK_SIZE x CHARACTER_DIMENSIONS, for example
+# 30 x 3 x 2. We need a 2 dimensional tensor of size len(X) x BLOCK_SIZE * CHARACTER_DIMENSIONS,
+# in this example 30 x 6. We want to feed single vectors with all the character vectors just concatenated end-to-end
+# into the first layer of the neural network. The view method does this efficiently for us.
 C_out_flattened = C_out.view(X.size(dim=0), CHARACTER_DIMENSIONS * BLOCK_SIZE)
 print(f"C_out_flattened: {C_out_flattened.shape}")
+l1_out = C_out_flattened @ W1 + b1
+print(f"l1_out: {l1_out.shape}")
+
 print("Done")
