@@ -65,8 +65,23 @@ for i in range(100):
     W.grad = None
     loss.backward()
     W.data += -50.0 * W.grad
-
-print(W.exp())
-
+# print(W.exp())
 print(f"Final loss: {loss_amount}")
 
+# Sampling
+for _ in range(500):
+    name = ""
+    x = 0
+    while True:
+        xenc = F.one_hot(torch.tensor([x]), num_classes=27).float()
+        logits = xenc @ W
+        counts = logits.exp()
+        sums = counts.sum(dim=1, keepdims=True)
+        probs = counts / sums
+
+        y = torch.multinomial(probs, num_samples=1, replacement=True, generator=generator).item()
+        if y == 0:
+            break
+        name += code_to_char[y]
+        x = y
+    print(name)
