@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, Set
 import torch
 from torch.nn import functional as F
 
+# Video 1: simple bigram model neural net to predict next char of a name, based on only the immediately preceding char
 
 EDGE_MARKER = "."  # depends on this character not appearing in the names
 
@@ -19,7 +20,7 @@ for name in names:
 char_set.add(EDGE_MARKER)
 chars = sorted(char_set)
 char_to_code: Dict[str, int] = {char: code for code, char in enumerate(chars)}
-code_to_char: Dict[str, int] = {code: char for code, char in enumerate(chars)}
+code_to_char: Dict[int, str] = {code: char for code, char in enumerate(chars)}
 
 # Compute a training set from the data
 x_list: List[int] = []   # latest character
