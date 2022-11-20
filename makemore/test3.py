@@ -32,7 +32,6 @@ for name in names:
 xs = torch.tensor(x_list)
 xenc = F.one_hot(xs, num_classes=27).float()
 ys = torch.tensor(y_list)
-yenc = F.one_hot(ys, num_classes=27).float()
 
 # Create our one layer, with 27 neurons, one for each char
 generator = torch.Generator().manual_seed(2147483647)
