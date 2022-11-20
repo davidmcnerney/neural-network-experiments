@@ -3,7 +3,9 @@ from typing import Dict, List, Optional, Set
 import torch
 from torch.nn import functional as F
 
+
 # Video 1: simple bigram model neural net to predict next char of a name, based on only the immediately preceding char
+
 
 EDGE_MARKER = "."  # depends on this character not appearing in the names
 
