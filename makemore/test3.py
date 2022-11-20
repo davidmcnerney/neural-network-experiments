@@ -24,7 +24,7 @@ code_to_char: Dict[str, int] = {code: char for code, char in enumerate(chars)}
 # Compute a training set from the data
 x_list: List[int] = []   # latest character
 y_list: List[int] = []   # next character after latest
-for name in names[:1]:
+for name in names:
     name = "." + name + "."
     for ch1, ch2 in zip(name, name[1:]):
         x_list.append(char_to_code[ch1])
@@ -40,7 +40,7 @@ W = torch.randn((27, 27), generator=generator, requires_grad=True)
 
 # Training
 loss_amount: Optional[float] = None
-for i in range(10000):
+for i in range(100):
     # Forward pass
 
     # Nx27 input matrix multiplied by a 27x27 matrix yields Nx27 output matrix, where output rows correspond to input rows
@@ -64,7 +64,9 @@ for i in range(10000):
     # Backward pass
     W.grad = None
     loss.backward()
-    W.data += -0.1 * W.grad
+    W.data += -50.0 * W.grad
+
+print(W)
 
 print(f"Final loss: {loss_amount}")
 
