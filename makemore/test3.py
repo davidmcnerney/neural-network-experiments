@@ -66,7 +66,7 @@ for i in range(100):
     loss.backward()
     W.data += -50.0 * W.grad
 
-print(W)
+print(W.exp())
 
 print(f"Final loss: {loss_amount}")
 
