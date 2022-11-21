@@ -19,7 +19,7 @@ LIMIT_INPUT_NAMES = None
 
 BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 6  # how many numbers we use to represent a character
-LAYER_1_COUNT_NEURONS = 300
+LAYER_1_COUNT_NEURONS = 200
 
 # TRAINING_CYCLES = 200000
 TRAINING_CYCLES = 40000
