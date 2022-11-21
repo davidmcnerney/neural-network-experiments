@@ -112,6 +112,22 @@ for p in parameters:
     p.requires_grad = True
 print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the model.")
 
+
+def forward_pass(X_: torch.Tensor, Y_: torch.Tensor) -> torch.Tensor:
+    l1_out = torch.tanh(C[X_].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
+    logits = l1_out @ W2 + b2
+    loss_ = F.cross_entropy(logits, Y_)
+    return loss_
+
+
+def backward_pass(loss_: torch.Tensor) -> None:
+    for p in parameters:
+        p.grad = None
+    loss_.backward()
+    for p in parameters:
+        p.data += -LEARNING_RATE * p.grad
+
+
 for _ in range(TRAINING_CYCLES):
     # Obtain this batch
     batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
@@ -119,21 +135,16 @@ for _ in range(TRAINING_CYCLES):
     Y_batch = Y_training[batch_indices]
 
     # Forward pass
-    l1_out = torch.tanh(C[X_batch].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
-    logits = l1_out @ W2 + b2
-    loss = F.cross_entropy(logits, Y_batch)
+    loss = forward_pass(X_batch, Y_batch)
     if TRAINING_CYCLES <= 100:
         print(f"Batch loss: {loss.item()}")
 
     # Backward pass
-    for p in parameters:
-        p.grad = None
-    loss.backward()
-    for p in parameters:
-        p.data += -LEARNING_RATE * p.grad
+    backward_pass(loss)
 
-# Forward pass with the dev data slice
-l1_out = torch.tanh(C[X_dev].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
-logits = l1_out @ W2 + b2
-dev_dataset_loss = F.cross_entropy(logits, Y_dev)
-print(f"Done, with loss: {dev_dataset_loss}")
+# Forward pass with the different slices
+print("")
+training_loss = forward_pass(X_training, Y_training)
+print(f"Training loss: {training_loss}")
+dev_loss = forward_pass(X_dev, Y_dev)
+print(f"Dev loss: {dev_loss}")
