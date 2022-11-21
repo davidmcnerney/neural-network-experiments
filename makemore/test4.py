@@ -160,8 +160,8 @@ for cycle_num in range(TRAINING_CYCLES):
     # Forward pass
     loss = forward_pass(X_batch, Y_batch)
     losses.append(loss.item())
-    if TRAINING_CYCLES <= 100 or cycle_num < 20:
-        print(f"Batch loss: {loss.item()}")
+    # if TRAINING_CYCLES <= 100 or cycle_num < 20:
+    #     print(f"Batch loss: {loss.item()}")
 
     # Backward pass
     learning_rate = LEARNING_RATE_1 if cycle_num < LEARNING_RATE_TRANSITION_AT_CYCLE else LEARNING_RATE_2
@@ -173,8 +173,7 @@ for cycle_num in range(TRAINING_CYCLES):
         sys.stdout.flush()
 print("")
 print("Training complete.")
-plt.plot(losses)
-plt.show()
+# plt.plot(losses); plt.show()
 
 
 # Forward pass with the different slices
