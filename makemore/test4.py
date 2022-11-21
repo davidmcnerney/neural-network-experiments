@@ -12,6 +12,7 @@ BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict wi
 CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 100
 LEARNING_RATE = 0.1
+BATCH_SIZE = 32
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -20,19 +21,19 @@ EDGE_MARKER = "."  # depends on this character not appearing in the names.txt fi
 BASE_PATH = "/Users/dave/Dropbox/Projects/Learning/Neural Networks/Karpathy/neural-network-learning-karpathy"
 names_file = f"{BASE_PATH}/resources/names.txt"
 names = open(names_file).read().splitlines()
-names = names[:5]  # limit data set for dev work
-print(f"{len(names)} names in input data set")
+# names = names[:5]  # limit data set for dev work
+print(f"{len(names)} names in input data set.")
 
 # We'll represent characters by integer codes
+char_set: Set[str] = set()
+for name in names:
+    for char in name:
+        char_set.add(char)
+char_set.add(EDGE_MARKER)
+chars = sorted(char_set)
 # Hard-code the char set for now, to perfectly match numbers in the videos.
-# char_set: Set[str] = set()
-# for name in names:
-#     for char in name:
-#         char_set.add(char)
-# char_set.add(EDGE_MARKER)
-# chars = sorted(char_set)
-chars = [EDGE_MARKER, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-assert len(chars) == 27
+# chars = [EDGE_MARKER, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+# assert len(chars) == 27
 char_to_code: Dict[str, int] = {char: code for code, char in enumerate(chars)}
 code_to_char: Dict[int, str] = {code: char for code, char in enumerate(chars)}
 
@@ -103,12 +104,19 @@ b2 = torch.randn(len(chars), generator=generator)
 parameters = [C, W1, b1, W2, b2]
 for p in parameters:
     p.requires_grad = True
+print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the model.")
 
 for _ in range(1000):
+    # Obtain this batch
+    batch_indices = torch.randint(0, X.shape[0], (BATCH_SIZE,), generator=generator)
+    X_batch = X[batch_indices]
+    Y_batch = Y[batch_indices]
+
     # Forward pass
-    l1_out = torch.tanh(C[X].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
+    l1_out = torch.tanh(C[X_batch].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
     logits = l1_out @ W2 + b2
-    loss = F.cross_entropy(logits, Y)
+    loss = F.cross_entropy(logits, Y_batch)
+    print(loss.item())
 
     # Backward pass
     for p in parameters:
