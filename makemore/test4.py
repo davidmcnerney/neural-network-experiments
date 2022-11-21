@@ -18,7 +18,7 @@ CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 100
 # LEARNING_RATE = 0.1
 BATCH_SIZE = 32
-TRAINING_CYCLES = 200000
+TRAINING_CYCLES = 1000
 LIMIT_INPUT_NAMES = None
 
 # Misc constants
@@ -116,10 +116,15 @@ for p in parameters:
 print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the model.")
 
 
-def forward_pass(X_: torch.Tensor, Y_: torch.Tensor) -> torch.Tensor:
+def logits_for_x(X_: torch.Tensor) -> torch.Tensor:
     l1_out = torch.tanh(C[X_].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
-    logits = l1_out @ W2 + b2
-    loss_ = F.cross_entropy(logits, Y_)
+    logits_ = l1_out @ W2 + b2
+    return logits_
+
+
+def forward_pass(X_: torch.Tensor, Y_: torch.Tensor) -> torch.Tensor:
+    logits_ = logits_for_x(X_)
+    loss_ = F.cross_entropy(logits_, Y_)
     return loss_
 
 
@@ -153,4 +158,20 @@ training_loss = forward_pass(X_training, Y_training)
 print(f"Training loss: {training_loss}")
 dev_loss = forward_pass(X_dev, Y_dev)
 print(f"Dev loss: {dev_loss}")
-print("Done")
+
+# Generate new names
+generator2 = torch.Generator().manual_seed(2147483647 + 10)
+for _ in range(20):
+    out_codes = []
+    current_chars = [0] * BLOCK_SIZE
+    while True:
+        logits = logits_for_x(current_chars)
+        probs = F.softmax(logits, dim=1)
+        next_char = torch.multinomial(probs, num_samples=1, generator=generator2).item()
+        current_chars = current_chars[1:] + [next_char]
+        out_codes.append(next_char)
+        if next_char == 0:
+            break
+    print(''.join(code_to_char[i] for i in out_codes))
+
+print("\nDone")
