@@ -11,6 +11,7 @@ from torch.nn import functional as F
 BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 100
+LEARNING_RATE = 0.1
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -96,12 +97,25 @@ b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator)
 W2 = torch.randn((LAYER_1_COUNT_NEURONS, len(chars)), generator=generator)
 b2 = torch.randn(len(chars), generator=generator)
 
+# Require grad for our leaf parameters.
+# Must be done before the forward pass, in order for the operations we perform to have a grad function
+# attached to them
 parameters = [C, W1, b1, W2, b2]
+for p in parameters:
+    p.requires_grad = True
 
-# Forward pass
-l1_out = torch.tanh(C[X].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
-logits = l1_out @ W2 + b2
-loss = F.cross_entropy(logits, Y)
+for _ in range(1000):
+    # Forward pass
+    l1_out = torch.tanh(C[X].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
+    logits = l1_out @ W2 + b2
+    loss = F.cross_entropy(logits, Y)
+
+    # Backward pass
+    for p in parameters:
+        p.grad = None
+    loss.backward()
+    for p in parameters:
+        p.data += -LEARNING_RATE * p.grad
 
 print(f"Done, with loss: {loss}")
 
