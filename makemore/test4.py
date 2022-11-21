@@ -87,7 +87,7 @@ n2 = int(0.9*len(names))
 X_training, Y_training = data_for_names(names[:n1])
 X_dev, Y_dev = data_for_names(names[n1:n2])
 X_test, Y_test = data_for_names(names[n2:])
-print(f"Data sets - training: {X_training.shape[0]} dev: {X_dev.shape[0]} test: {X_test.shape[0]}")
+print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_test.shape[0]}")
 
 
 # Initial lookup matrix
@@ -137,6 +137,7 @@ def backward_pass(loss_: torch.Tensor, learning_rate: float) -> None:
 
 
 # Training loop
+print(f"Training for {TRAINING_CYCLES} cycles.")
 for cycle_num in range(TRAINING_CYCLES):
     # Obtain this batch
     batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
@@ -160,6 +161,7 @@ dev_loss = forward_pass(X_dev, Y_dev)
 print(f"Dev loss: {dev_loss}")
 
 # Generate new names
+print("")
 generator2 = torch.Generator().manual_seed(2147483647 + 10)
 for _ in range(20):
     out_codes = []
@@ -169,9 +171,10 @@ for _ in range(20):
         probs = F.softmax(logits, dim=1)
         next_char = torch.multinomial(probs, num_samples=1, generator=generator2).item()
         current_chars = current_chars[1:] + [next_char]
-        out_codes.append(next_char)
         if next_char == 0:
             break
+        out_codes.append(next_char)
     print(''.join(code_to_char[i] for i in out_codes))
 
-print("\nDone")
+print("")
+print("Done")
