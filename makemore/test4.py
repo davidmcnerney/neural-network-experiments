@@ -108,7 +108,7 @@ C = torch.randn((len(chars), CHARACTER_DIMENSIONS), generator=generator)
 # Maps the combined character vectors for the characters in the preceding block to vector containing one output
 # float per neuron
 W1 = torch.randn((CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS), generator=generator) * 0.2
-b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator) *0.01
+b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator) * 0.01
 
 # Layer 2
 # Maps layer 1 output to probability vector of size len(chars)
