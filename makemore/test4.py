@@ -102,18 +102,18 @@ print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_te
 # Maps character code one-hot vectors to vectors of CHARACTER_DIMENSIONS size
 # Each row N is the vector for character N, so you can directly index as well
 generator = torch.Generator().manual_seed(2147483647)
-C = torch.randn((len(chars), CHARACTER_DIMENSIONS), generator=generator)
+C = torch.randn((len(chars), CHARACTER_DIMENSIONS),                          generator=generator)
 
 # Layer 1
 # Maps the combined character vectors for the characters in the preceding block to vector containing one output
 # float per neuron
 W1 = torch.randn((CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS), generator=generator) * 0.2
-b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator) * 0.01
+b1 = torch.randn(LAYER_1_COUNT_NEURONS,                                      generator=generator) * 0.01
 
 # Layer 2
 # Maps layer 1 output to probability vector of size len(chars)
-W2 = torch.randn((LAYER_1_COUNT_NEURONS, len(chars)), generator=generator) * 0.1
-b2 = torch.randn(len(chars), generator=generator)
+W2 = torch.randn((LAYER_1_COUNT_NEURONS, len(chars)),                        generator=generator) * 0.1
+b2 = torch.randn(len(chars),                                                 generator=generator)
 
 # Require grad for our leaf parameters.
 # Must be done before the forward pass, in order for the operations we perform to have a grad function
