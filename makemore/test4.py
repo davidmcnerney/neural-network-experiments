@@ -13,13 +13,18 @@ from torch.nn import functional as F
 
 
 # Hyperparameters etc
+
+LIMIT_INPUT_NAMES = None
+
 BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 100
-# LEARNING_RATE = 0.1
+
+TRAINING_CYCLES = 200000
 BATCH_SIZE = 32
-TRAINING_CYCLES = 1000
-LIMIT_INPUT_NAMES = None
+LEARNING_RATE_1 = 0.1
+LEARNING_RATE_2 = 0.01
+LEARNING_RATE_TRANSITION_AT_CYCLE = 100000
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -34,15 +39,15 @@ if LIMIT_INPUT_NAMES is not None:
 print(f"{len(names)} names in input data set.")
 
 # We'll represent characters by integer codes
-# char_set: Set[str] = set()
-# for name in names:
-#     for char in name:
-#         char_set.add(char)
-# char_set.add(EDGE_MARKER)
-# chars = sorted(char_set)
-# Hard-code the char set for now, to perfectly match numbers in the videos.
-chars = [EDGE_MARKER, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
-assert len(chars) == 27
+char_set: Set[str] = set()
+for name in names:
+    for char in name:
+        char_set.add(char)
+char_set.add(EDGE_MARKER)
+chars = sorted(char_set)
+# # Hard-code the char set for now, to perfectly match numbers in the videos.
+# chars = [EDGE_MARKER, "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"]
+# assert len(chars) == 27
 char_to_code: Dict[str, int] = {char: code for code, char in enumerate(chars)}
 code_to_char: Dict[int, str] = {code: char for code, char in enumerate(chars)}
 
@@ -150,7 +155,7 @@ for cycle_num in range(TRAINING_CYCLES):
         print(f"Batch loss: {loss.item()}")
 
     # Backward pass
-    learning_rate = 0.1 if cycle_num < 100000 else 0.01
+    learning_rate = LEARNING_RATE_1 if cycle_num < LEARNING_RATE_TRANSITION_AT_CYCLE else LEARNING_RATE_2
     backward_pass(loss, learning_rate=learning_rate)
 
 # Forward pass with the different slices
@@ -163,7 +168,7 @@ print(f"Dev loss: {dev_loss}")
 # Generate new names
 print("")
 generator2 = torch.Generator().manual_seed(2147483647 + 10)
-for _ in range(20):
+for _ in range(10):
     out_codes = []
     current_chars = [0] * BLOCK_SIZE
     while True:
