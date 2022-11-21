@@ -2,6 +2,7 @@ import random
 import sys
 from typing import Dict, List, Optional, Set, Tuple
 
+import matplotlib.pyplot as plt
 import torch
 from torch.nn import functional as F
 
@@ -106,8 +107,8 @@ C = torch.randn((len(chars), CHARACTER_DIMENSIONS), generator=generator)
 # Layer 1
 # Maps the combined character vectors for the characters in the preceding block to vector containing one output
 # float per neuron
-W1 = torch.randn((CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS), generator=generator)
-b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator)
+W1 = torch.randn((CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS), generator=generator) * 0.2
+b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator) *0.01
 
 # Layer 2
 # Maps layer 1 output to probability vector of size len(chars)
@@ -124,7 +125,10 @@ print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the mode
 
 
 def logits_for_x(X_: torch.Tensor) -> torch.Tensor:
-    l1_out = torch.tanh(C[X_].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
+    l1_out_before = C[X_].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1
+    # plt.hist(l1_out_before.view(-1).tolist(), 50); plt.show()
+    l1_out = torch.tanh(l1_out_before)
+    # plt.hist(l1_out.view(-1).tolist(), 50); plt.show()
     logits_ = l1_out @ W2 + b2
     return logits_
 
@@ -146,6 +150,7 @@ def backward_pass(loss_: torch.Tensor, learning_rate: float) -> None:
 # Training loop
 print(f"Training for {TRAINING_CYCLES} cycles ", end="")
 sys.stdout.flush()
+losses = []
 for cycle_num in range(TRAINING_CYCLES):
     # Obtain this batch
     batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
@@ -154,6 +159,7 @@ for cycle_num in range(TRAINING_CYCLES):
 
     # Forward pass
     loss = forward_pass(X_batch, Y_batch)
+    losses.append(loss.item())
     if TRAINING_CYCLES <= 100 or cycle_num < 20:
         print(f"Batch loss: {loss.item()}")
 
@@ -166,6 +172,9 @@ for cycle_num in range(TRAINING_CYCLES):
         print(".", end="")
         sys.stdout.flush()
 print("")
+print("Training complete.")
+plt.plot(losses)
+plt.show()
 
 
 # Forward pass with the different slices
