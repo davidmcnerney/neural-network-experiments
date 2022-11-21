@@ -111,7 +111,7 @@ b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator)
 
 # Layer 2
 # Maps layer 1 output to probability vector of size len(chars)
-W2 = torch.randn((LAYER_1_COUNT_NEURONS, len(chars)), generator=generator)
+W2 = torch.randn((LAYER_1_COUNT_NEURONS, len(chars)), generator=generator) * 0.1
 b2 = torch.randn(len(chars), generator=generator)
 
 # Require grad for our leaf parameters.
@@ -154,7 +154,7 @@ for cycle_num in range(TRAINING_CYCLES):
 
     # Forward pass
     loss = forward_pass(X_batch, Y_batch)
-    if TRAINING_CYCLES <= 100:
+    if TRAINING_CYCLES <= 100 or cycle_num < 20:
         print(f"Batch loss: {loss.item()}")
 
     # Backward pass
