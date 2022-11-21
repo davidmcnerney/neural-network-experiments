@@ -1,3 +1,4 @@
+import random
 from typing import Dict, List, Optional, Set
 
 import torch
@@ -23,6 +24,8 @@ BASE_PATH = "/Users/dave/Dropbox/Projects/Learning/Neural Networks/Karpathy/neur
 names_file = f"{BASE_PATH}/resources/names.txt"
 names = open(names_file).read().splitlines()
 # names = names[:5]  # limit data set for dev work
+random.seed(42)
+random.shuffle(names)
 print(f"{len(names)} names in input data set.")
 
 # We'll represent characters by integer codes
@@ -61,26 +64,28 @@ Y = torch.tensor(ys)
 
 # Divide into training, dev, and test data sets
 # We divide our names data set up into 3 subsets: 80% for training, 10% for dev testing, and 10% for final test
-# count_training = round(len(xs) * 0.8)
-# count_dev = round(len(xs) * 0.1)
-# count_test = len(xs) - count_dev - count_training
-# xs_training = xs[:count_training]
-# ys_training = ys[:count_training]
-# xs_dev = xs[len(xs_training):len(xs_training) + count_dev]
-# ys_dev = ys[len(ys_training):len(ys_training) + count_dev]
-# xs_test = xs[len(xs_training) + len(xs_dev):]
-# ys_test = ys[len(ys_training) + len(ys_dev):]
-# assert len(xs_training) + len(xs_dev) + len(xs_test) == len(xs)
-# assert len(ys_training) + len(ys_dev) + len(ys_test) == len(ys)
-# assert len(xs_training) == len(ys_training)
-# assert len(xs_dev) == len(ys_dev)
-# print(f"total: {len(xs)} training: {len(xs_training)} dev: {len(xs_dev)} test: {len(xs_test)}")
-# X_training = torch.tensor(xs_training)
-# Y_training = torch.tensor(ys_training)
-# X_dev = torch.tensor(xs_dev)
-# Y_dev = torch.tensor(ys_dev)
-# X_test = torch.tensor(xs_test)
-# Y_test = torch.tensor(ys_test)
+count_training = round(len(xs) * 0.8)
+count_dev = round(len(xs) * 0.1)
+count_test = len(xs) - count_dev - count_training
+n1 = count_training
+n2 = count_training + count_dev
+xs_training = xs[:n1]
+ys_training = ys[:n1]
+xs_dev = xs[n1:n2]
+ys_dev = ys[n1:n2]
+xs_test = xs[n2:]
+ys_test = ys[n2:]
+assert len(xs_training) + len(xs_dev) + len(xs_test) == len(xs)
+assert len(ys_training) + len(ys_dev) + len(ys_test) == len(ys)
+assert len(xs_training) == len(ys_training)
+assert len(xs_dev) == len(ys_dev)
+X_training = torch.tensor(xs_training)
+Y_training = torch.tensor(ys_training)
+X_dev = torch.tensor(xs_dev)
+Y_dev = torch.tensor(ys_dev)
+X_test = torch.tensor(xs_test)
+Y_test = torch.tensor(ys_test)
+print(f"Data sets - total: {len(xs)} training: {len(xs_training)} dev: {len(xs_dev)} test: {len(xs_test)}")
 
 # Initial lookup matrix
 # Maps character code one-hot vectors to vectors of CHARACTER_DIMENSIONS size
@@ -109,9 +114,9 @@ print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the mode
 
 for _ in range(TRAINING_CYCLES):
     # Obtain this batch
-    batch_indices = torch.randint(0, X.shape[0], (BATCH_SIZE,), generator=generator)
-    X_batch = X[batch_indices]
-    Y_batch = Y[batch_indices]
+    batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
+    X_batch = X_training[batch_indices]
+    Y_batch = Y_training[batch_indices]
 
     # Forward pass
     l1_out = torch.tanh(C[X_batch].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
@@ -127,9 +132,8 @@ for _ in range(TRAINING_CYCLES):
     for p in parameters:
         p.data += -LEARNING_RATE * p.grad
 
-# Forward pass with all the data
-l1_out = torch.tanh(C[X].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
+# Forward pass with the dev data slice
+l1_out = torch.tanh(C[X_dev].view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE) @ W1 + b1)
 logits = l1_out @ W2 + b2
-full_dataset_loss = F.cross_entropy(logits, Y)
-
-print(f"Done, with loss: {full_dataset_loss}")
+dev_dataset_loss = F.cross_entropy(logits, Y_dev)
+print(f"Done, with loss: {dev_dataset_loss}")
