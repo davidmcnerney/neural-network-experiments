@@ -20,7 +20,7 @@ BASE_PATH = "/Users/dave/Dropbox/Projects/Learning/Neural Networks/Karpathy/neur
 names_file = f"{BASE_PATH}/resources/names.txt"
 names = open(names_file).read().splitlines()
 names = names[:5]  # limit data set for dev work
-print(f"{len(names)} names")
+print(f"{len(names)} names in input data set")
 
 # We'll represent characters by integer codes
 # Hard-code the char set for now, to perfectly match numbers in the videos.
@@ -89,9 +89,7 @@ C = torch.randn((len(chars), CHARACTER_DIMENSIONS), generator=generator)
 # Maps the combined character vectors for the characters in the preceding block to vector containing one output
 # float per neuron
 W1 = torch.randn((CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_1_COUNT_NEURONS), generator=generator)
-print(f"W1: {W1.shape}")
 b1 = torch.randn(LAYER_1_COUNT_NEURONS, generator=generator)
-print(f"b1: {b1.shape}")
 
 # Layer 2
 # Maps layer 1 output to probability vector of size len(chars)
