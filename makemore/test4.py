@@ -22,7 +22,7 @@ CHARACTER_DIMENSIONS = 6  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 300
 
 # TRAINING_CYCLES = 200000
-TRAINING_CYCLES = 20000
+TRAINING_CYCLES = 40000
 BATCH_SIZE = 64
 LEARNING_RATE_1 = 0.4
 LEARNING_RATE_2 = 0.05
@@ -171,9 +171,8 @@ print("")
 # Forward pass with the different slices
 print("")
 training_loss = forward_pass(X_training, Y_training)
-print(f"Training loss: {training_loss}")
 dev_loss = forward_pass(X_dev, Y_dev)
-print(f"Dev loss: {dev_loss}")
+print(f"training loss {training_loss:.6}, dev loss {dev_loss:.6}")
 
 # Generate new names
 print("")
