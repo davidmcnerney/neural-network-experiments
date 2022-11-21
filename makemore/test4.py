@@ -21,12 +21,13 @@ BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict wi
 CHARACTER_DIMENSIONS = 6  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 200
 
-# TRAINING_CYCLES = 200000
-TRAINING_CYCLES = 40000
+TRAINING_CYCLES = 200000
+# TRAINING_CYCLES = 40000
 BATCH_SIZE = 64
 LEARNING_RATE_1 = 0.6
 LEARNING_RATE_2 = 0.05
-LEARNING_RATE_TRANSITION_AT_CYCLE = 10000
+LEARNING_RATE_TRANSITION_AT_CYCLE = 100000
+# LEARNING_RATE_TRANSITION_AT_CYCLE = 10000
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
