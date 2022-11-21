@@ -1,4 +1,5 @@
 import random
+import sys
 from typing import Dict, List, Optional, Set, Tuple
 
 import torch
@@ -20,8 +21,9 @@ BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict wi
 CHARACTER_DIMENSIONS = 2  # how many numbers we use to represent a character
 LAYER_1_COUNT_NEURONS = 100
 
-TRAINING_CYCLES = 200000
-BATCH_SIZE = 32
+# TRAINING_CYCLES = 200000
+TRAINING_CYCLES = 20000
+BATCH_SIZE = 128
 LEARNING_RATE_1 = 0.1
 LEARNING_RATE_2 = 0.01
 LEARNING_RATE_TRANSITION_AT_CYCLE = 100000
@@ -142,7 +144,8 @@ def backward_pass(loss_: torch.Tensor, learning_rate: float) -> None:
 
 
 # Training loop
-print(f"Training for {TRAINING_CYCLES} cycles.")
+print(f"Training for {TRAINING_CYCLES} cycles ", end="")
+sys.stdout.flush()
 for cycle_num in range(TRAINING_CYCLES):
     # Obtain this batch
     batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
@@ -157,6 +160,13 @@ for cycle_num in range(TRAINING_CYCLES):
     # Backward pass
     learning_rate = LEARNING_RATE_1 if cycle_num < LEARNING_RATE_TRANSITION_AT_CYCLE else LEARNING_RATE_2
     backward_pass(loss, learning_rate=learning_rate)
+
+    # Progress indicator
+    if (cycle_num + 1) % 10000 == 0:
+        print(".", end="")
+        sys.stdout.flush()
+print("")
+
 
 # Forward pass with the different slices
 print("")
