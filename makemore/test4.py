@@ -23,6 +23,7 @@ names = names[:5]  # limit data set for dev work
 print(f"{len(names)} names")
 
 # We'll represent characters by integer codes
+# Hard-code the char set for now, to perfectly match numbers in the videos.
 # char_set: Set[str] = set()
 # for name in names:
 #     for char in name:
@@ -100,8 +101,10 @@ b2 = torch.randn(len(chars), generator=generator)
 parameters = [C, W1, b1, W2, b2]
 
 # Forward pass
+
 C_out = C[X]
 print(f"C_out: {C_out.shape}")
+
 # C_out is a 3 dimensional tensor of size len(X) x BLOCK_SIZE x CHARACTER_DIMENSIONS, for example
 # 30 x 3 x 2. We need a 2 dimensional tensor of size len(X) x BLOCK_SIZE * CHARACTER_DIMENSIONS,
 # in this example 30 x 6. We want to feed single vectors with all the character vectors just concatenated end-to-end
@@ -111,6 +114,7 @@ print(f"C_out_flattened: {C_out_flattened.shape}")
 # b1 is broadcast to add its weights to every row of the output
 l1_out = torch.tanh(C_out_flattened @ W1 + b1)
 print(f"l1_out: {l1_out.shape}")
+
 l2_out = l1_out @ W2 + b2
 print(f"l2_out: {l2_out.shape}")
 logits = l2_out
@@ -120,6 +124,7 @@ sums = counts.sum(dim=1, keepdims=True)
 print(f"sums: {sums.shape}")
 probs = counts / sums
 print(f"probs: {probs.shape}")
+
 ar = torch.arange(Y.size(dim=0))
 relevant = probs[ar, Y]
 loss = -relevant.log().mean()
