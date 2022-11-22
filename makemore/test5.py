@@ -234,7 +234,8 @@ def backward_pass(loss_: torch.Tensor, learning_rate: float) -> None:
 # Training loop
 print(f"Training for {TRAINING_CYCLES} cycles ", end="")
 sys.stdout.flush()
-losses = []
+losses: List[float] = []
+update_to_data_ratios: List[List[float]] = []
 for cycle_num in range(TRAINING_CYCLES):
     # Obtain this batch
     batch_indices = torch.randint(0, X_training.shape[0], (BATCH_SIZE,), generator=generator)
@@ -250,6 +251,12 @@ for cycle_num in range(TRAINING_CYCLES):
     # Backward pass
     learning_rate = LEARNING_RATE_1 if cycle_num < LEARNING_RATE_TRANSITION_AT_CYCLE else LEARNING_RATE_2
     backward_pass(loss, learning_rate=learning_rate)
+
+    # Track update to data ratio
+    with torch.no_grad():
+        update_to_data_ratios.append(
+            [((learning_rate * p.grad).std() / p.data.std()).log10().item() for p in parameters]
+        )
 
     # Progress indicator
     if (cycle_num + 1) % 10000 == 0:
@@ -313,6 +320,20 @@ for i, parameter in enumerate(parameters):
         hx = hx[:-1]   # hx is the bin edges, so it has one more element than hy
         plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
         legends.append(f"parameter {i}")
+plt.legend(legends)
+plt.title("Weight Gradient Distribution")
+plt.show()
+
+
+# Update to data ratio by parameter
+plt.figure(figsize=(100, 15))
+legends = []
+print("")
+for i, parameter in enumerate(parameters):
+    if parameter.ndim == 2:
+        plt.plot([point[i] for point in update_to_data_ratios])
+        legends.append(f"parameter {i}")
+plt.plot([0, len(update_to_data_ratios)], [-3, -3], "k")
 plt.legend(legends)
 plt.title("Weight Gradient Distribution")
 plt.show()
