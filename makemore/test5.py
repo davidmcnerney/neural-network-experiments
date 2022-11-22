@@ -264,8 +264,12 @@ print("Training complete.")
 
 
 # Analytics
+
+# Activations
 plt.figure(figsize=(100, 15))
 legends = []
+print("")
+print("Activations:")
 for i, layer in enumerate(layers[:-1]):
     if isinstance(layer, Tanh):
         t = layer.out
@@ -277,6 +281,23 @@ for i, layer in enumerate(layers[:-1]):
         legends.append(f"layer {i} ({layer.__class__.__name__})")
 plt.legend(legends)
 plt.title("activation distribution")
+plt.show()
+
+# Gradient
+plt.figure(figsize=(100, 15))
+legends = []
+print("")
+print("Gradients:")
+for i, layer in enumerate(layers[:-1]):
+    if isinstance(layer, Linear):
+        t = layer.out.grad
+        print(f"layer {i} ({layer.__class__.__name__}): mean {t.mean():.2} std {t.std():.2}")
+        hy, hx = torch.histogram(t, density=True)
+        hx = hx[:-1]   # hx is the bin edges, so it has one more element than hy
+        plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
+        legends.append(f"layer {i} ({layer.__class__.__name__})")
+plt.legend(legends)
+plt.title("gradient distribution")
 plt.show()
 
 
