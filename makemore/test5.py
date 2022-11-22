@@ -263,7 +263,7 @@ print("Training complete.")
 # plt.plot(losses); plt.show()
 
 
-# Analytics
+# Plots and reports
 
 # Activations
 plt.figure(figsize=(100, 15))
@@ -280,7 +280,7 @@ for i, layer in enumerate(layers[:-1]):
         plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
         legends.append(f"layer {i} ({layer.__class__.__name__})")
 plt.legend(legends)
-plt.title("activation distribution")
+plt.title("Activation Distribution")
 plt.show()
 
 # Gradient
@@ -297,7 +297,24 @@ for i, layer in enumerate(layers[:-1]):
         plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
         legends.append(f"layer {i} ({layer.__class__.__name__})")
 plt.legend(legends)
-plt.title("gradient distribution")
+plt.title("Gradient Distribution")
+plt.show()
+
+# Weight gradient distribution
+plt.figure(figsize=(100, 15))
+legends = []
+print("")
+print("Weight Gradients:")
+for i, parameter in enumerate(parameters):
+    if parameter.ndim == 2:
+        t = parameter.grad
+        print(f"parameter {i} weight {tuple(parameter.shape)}  grad mean {t.mean():.2} std {t.std():.2} ratio {t.std() / p.std():0.2}")
+        hy, hx = torch.histogram(t, density=True)
+        hx = hx[:-1]   # hx is the bin edges, so it has one more element than hy
+        plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
+        legends.append(f"parameter {i}")
+plt.legend(legends)
+plt.title("Weight Gradient Distribution")
 plt.show()
 
 
