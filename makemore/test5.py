@@ -2,6 +2,7 @@ import random
 import sys
 from typing import Dict, List, Optional, Set, Tuple
 
+import matplotlib.pyplot as plt
 import torch
 from torch.nn import functional as F
 
@@ -32,7 +33,7 @@ generator = torch.Generator().manual_seed(2147483647)
 
 class Linear:
     def __init__(self, in_features: int, out_features: int, bias: bool = True):
-        self.weight = torch.randn((in_features, out_features), generator=generator)
+        self.weight = torch.randn((in_features, out_features), generator=generator) / in_features ** 0.5
         if bias:
             self.bias = torch.zeros(out_features)
         self.out: Optional[torch.tensor] = None
@@ -254,9 +255,29 @@ for cycle_num in range(TRAINING_CYCLES):
     if (cycle_num + 1) % 10000 == 0:
         print(".", end="")
         sys.stdout.flush()
+
+    # Testing
+    # break
 print("")
 print("Training complete.")
 # plt.plot(losses); plt.show()
+
+
+# Analytics
+plt.figure(figsize=(100, 15))
+legends = []
+for i, layer in enumerate(layers[:-1]):
+    if isinstance(layer, Tanh):
+        t = layer.out
+        saturation = (t.abs() > 0.97).float().mean().item() * 100.0
+        print(f"layer {i} ({layer.__class__.__name__}): mean {t.mean():.2} std {t.std():.2} sat {round(saturation)}%")
+        hy, hx = torch.histogram(t, density=True)
+        hx = hx[:-1]   # hx is the bin edges, so it has one more element than hy
+        plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
+        legends.append(f"layer {i} ({layer.__class__.__name__})")
+plt.legend(legends)
+plt.title("activation distribution")
+plt.show()
 
 
 # Forward pass with the different slices
