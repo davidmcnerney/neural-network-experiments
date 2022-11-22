@@ -175,12 +175,12 @@ C = torch.randn((charset_size, CHARACTER_DIMENSIONS),                          g
 
 # Layers
 layers = [
-    Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), Tanh(),
+    Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(              LAYER_COUNT_NEURONS, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
     Linear(              LAYER_COUNT_NEURONS, charset_size),
 ]
 
@@ -315,7 +315,7 @@ print("Weight Gradients:")
 for i, parameter in enumerate(parameters):
     if parameter.ndim == 2:
         t = parameter.grad
-        print(f"parameter {i} weight {tuple(parameter.shape)}  grad mean {t.mean():.2} std {t.std():.2} ratio {t.std() / p.std():0.2}")
+        print(f"parameter {i} weight {tuple(parameter.shape)}  grad mean {t.mean():.2} std {t.std():.2} ratio {t.std() / parameter.std():0.2}")
         hy, hx = torch.histogram(t, density=True)
         hx = hx[:-1]   # hx is the bin edges, so it has one more element than hy
         plt.plot(hx.detach(), hy.detach())  # not sure why it's important to call detach() here, I guess to avoid extending the computation graph that Pytorch maintains?
@@ -325,7 +325,7 @@ plt.title("Weight Gradient Distribution")
 plt.show()
 
 
-# Update to data ratio by parameter
+# Update-to-data ratio by parameter
 plt.figure(figsize=(100, 15))
 legends = []
 print("")
@@ -338,6 +338,10 @@ plt.legend(legends)
 plt.title("Update to Data Ratio")
 plt.show()
 
+
+# Turn off training mode in the layers
+for layer in layers:
+    layer.training = False
 
 # Forward pass with the different slices
 print("")
