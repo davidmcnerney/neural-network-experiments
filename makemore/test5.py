@@ -335,7 +335,7 @@ for i, parameter in enumerate(parameters):
         legends.append(f"parameter {i}")
 plt.plot([0, len(update_to_data_ratios)], [-3, -3], "k")
 plt.legend(legends)
-plt.title("Weight Gradient Distribution")
+plt.title("Update to Data Ratio")
 plt.show()
 
 
