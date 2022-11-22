@@ -182,7 +182,7 @@ training_loss = forward_pass(X_training, Y_training)
 dev_loss = forward_pass(X_dev, Y_dev)
 print(f"training loss {training_loss:.6}, dev loss {dev_loss:.6}")
 
-# Generate new names
+# Sampling - generate new names
 print("")
 generator2 = torch.Generator().manual_seed(2147483647 + 10)
 for _ in range(10):
