@@ -143,7 +143,11 @@ print(loss)
 # backpropagating through exactly all of the variables
 # as they are defined in the forward pass above, one by one
 
-# cmp('logprobs', dlogprobs, logprobs)
+
+dlogprobs = torch.zeros_like(logprobs).index_put((torch.tensor(range(n)), Yb), torch.tensor(-1.0 / n))
+cmp('logprobs', dlogprobs, logprobs)
+
+
 # cmp('probs', dprobs, probs)
 # cmp('counts_sum_inv', dcounts_sum_inv, counts_sum_inv)
 # cmp('counts_sum', dcounts_sum, counts_sum)
@@ -183,3 +187,6 @@ print(loss)
 
 # Exercise 4: putting it all together!
 # Train the MLP neural net with your own backward pass
+
+
+print("Done")
