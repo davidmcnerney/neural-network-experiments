@@ -157,7 +157,9 @@ cmp('counts_sum_inv', dcounts_sum_inv, counts_sum_inv)
 dcounts_sum = -(counts_sum ** -2.0) * dcounts_sum_inv
 cmp('counts_sum', dcounts_sum, counts_sum)
 
-# cmp('counts', dcounts, counts)
+dcounts = 1.0 * dcounts_sum.repeat(1, vocab_size) + counts_sum_inv * dprobs  # counts used twice, so we add the two contributions
+cmp('counts', dcounts, counts)
+
 # cmp('norm_logits', dnorm_logits, norm_logits)
 # cmp('logit_maxes', dlogit_maxes, logit_maxes)
 # cmp('logits', dlogits, logits)
