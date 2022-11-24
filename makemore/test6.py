@@ -163,7 +163,9 @@ cmp('counts', dcounts, counts)
 dnorm_logits = norm_logits.exp() * dcounts
 cmp('norm_logits', dnorm_logits, norm_logits)
 
-# cmp('logit_maxes', dlogit_maxes, logit_maxes)
+dlogit_maxes = (-1.0 * dnorm_logits).sum(1, keepdim=True)  # logit_maxes is 32x1, so broadcasts out to subtract from all 27 cols of logits. We have to sum up all these contributions
+cmp('logit_maxes', dlogit_maxes, logit_maxes)
+
 # cmp('logits', dlogits, logits)
 # cmp('h', dh, h)
 # cmp('W2', dW2, W2)
