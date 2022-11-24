@@ -143,14 +143,14 @@ print(loss)
 # backpropagating through exactly all of the variables
 # as they are defined in the forward pass above, one by one
 
-
 dlogprobs = torch.zeros_like(logprobs).index_put((torch.tensor(range(n)), Yb), torch.tensor(-1.0 / n))
 # dlogprobs = torch.zeroes_like(logprobs)   # Kaparthy
 # dlogprobs[range(n), Yb] = -1.0 / n
 cmp('logprobs', dlogprobs, logprobs)
 
+dprobs = (1.0 / probs) * dlogprobs
+cmp('probs', dprobs, probs)
 
-# cmp('probs', dprobs, probs)
 # cmp('counts_sum_inv', dcounts_sum_inv, counts_sum_inv)
 # cmp('counts_sum', dcounts_sum, counts_sum)
 # cmp('counts', dcounts, counts)
