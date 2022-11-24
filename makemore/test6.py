@@ -166,7 +166,11 @@ cmp('norm_logits', dnorm_logits, norm_logits)
 dlogit_maxes = (-1.0 * dnorm_logits).sum(1, keepdim=True)  # logit_maxes is 32x1, so broadcasts out to subtract from all 27 cols of logits. We have to sum up all these contributions
 cmp('logit_maxes', dlogit_maxes, logit_maxes)
 
-# cmp('logits', dlogits, logits)
+_, indices = logits.max(dim=1, keepdim=True)
+ones_max_logits = torch.zeros_like(logits).scatter(1, indices, 1.0)
+dlogits = ones_max_logits * dlogit_maxes + 1.0 * dnorm_logits  # should be 1 for each element that is the max in its row, 0 for others
+cmp('logits', dlogits, logits)
+
 # cmp('h', dh, h)
 # cmp('W2', dW2, W2)
 # cmp('b2', db2, b2)
