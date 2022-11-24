@@ -145,6 +145,8 @@ print(loss)
 
 
 dlogprobs = torch.zeros_like(logprobs).index_put((torch.tensor(range(n)), Yb), torch.tensor(-1.0 / n))
+# dlogprobs = torch.zeroes_like(logprobs)   # Kaparthy
+# dlogprobs[range(n), Yb] = -1.0 / n
 cmp('logprobs', dlogprobs, logprobs)
 
 
