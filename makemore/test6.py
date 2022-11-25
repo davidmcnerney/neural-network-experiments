@@ -176,7 +176,11 @@ cmp('logits', dlogits, logits)
 dh = dlogits @ W2.transpose(0, 1)
 cmp('h', dh, h)
 
-# cmp('W2', dW2, W2)
+# logits (32x27) = h (32x64) @ W2 (64x27) + b(27)
+# dW2/dloss (64x27) = transpose(h) (64x32) @ dlogits/dloss (32x27)
+dW2 = h.transpose(0, 1) @ dlogits
+cmp('W2', dW2, W2)
+
 # cmp('b2', db2, b2)
 # cmp('hpreact', dhpreact, hpreact)
 # cmp('bngain', dbngain, bngain)
