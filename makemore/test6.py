@@ -197,7 +197,9 @@ cmp('bnbias', dbnbias, bnbias)
 dbnraw = bngain * dhpreact
 cmp('bnraw', dbnraw, bnraw)
 
-# cmp('bnvar_inv', dbnvar_inv, bnvar_inv)
+dbnvar_inv = (dbnraw * bndiff).sum(0, keepdim=True)
+cmp('bnvar_inv', dbnvar_inv, bnvar_inv)
+
 # cmp('bnvar', dbnvar, bnvar)
 # cmp('bndiff2', dbndiff2, bndiff2)
 # cmp('bndiff', dbndiff, bndiff)
