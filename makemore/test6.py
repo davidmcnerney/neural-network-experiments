@@ -181,7 +181,9 @@ cmp('h', dh, h)
 dW2 = h.transpose(0, 1) @ dlogits
 cmp('W2', dW2, W2)
 
-# cmp('b2', db2, b2)
+db2 = dlogits.sum(dim=0, keepdim=True)
+cmp('b2', db2, b2)
+
 # cmp('hpreact', dhpreact, hpreact)
 # cmp('bngain', dbngain, bngain)
 # cmp('bnbias', dbnbias, bnbias)
