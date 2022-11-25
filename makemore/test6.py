@@ -209,11 +209,23 @@ cmp('bndiff2', dbndiff2, bndiff2)
 dbndiff = 2.0 * bndiff * dbndiff2 + bnvar_inv * dbnraw
 cmp('bndiff', dbndiff, bndiff)
 
-# cmp('bnmeani', dbnmeani, bnmeani)
-# cmp('hprebn', dhprebn, hprebn)
-# cmp('embcat', dembcat, embcat)
-# cmp('W1', dW1, W1)
-# cmp('b1', db1, b1)
+dbnmeani = -1.0 * dbndiff.sum(dim=0, keepdim=True)
+cmp('bnmeani', dbnmeani, bnmeani)
+
+dhprebn = (1.0 / n) * dbnmeani.repeat(n, 1) + 1.0 * dbndiff
+cmp('hprebn', dhprebn, hprebn)
+
+# hprebn (32x64) = embcat (32x30) @ W1 (30x64) + b1
+dembcat = dhprebn @ W1.transpose(0, 1)
+cmp('embcat', dembcat, embcat)
+
+# hprebn (32x64) = embcat (32x30) @ W1 (30x64) + b1
+dW1 = embcat.transpose(0, 1) @ dhprebn
+cmp('W1', dW1, W1)
+
+db1 = dhprebn.sum(dim=1, keepdim=False)
+cmp('b1', db1, b1)
+
 # cmp('emb', demb, emb)
 # cmp('C', dC, C)
 
