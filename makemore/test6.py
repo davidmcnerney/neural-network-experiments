@@ -184,7 +184,9 @@ cmp('W2', dW2, W2)
 db2 = dlogits.sum(dim=0, keepdim=True)
 cmp('b2', db2, b2)
 
-# cmp('hpreact', dhpreact, hpreact)
+dhpreact = (torch.ones_like(h) - h ** 2) * dh
+cmp('hpreact', dhpreact, hpreact)
+
 # cmp('bngain', dbngain, bngain)
 # cmp('bnbias', dbnbias, bnbias)
 # cmp('bnraw', dbnraw, bnraw)
