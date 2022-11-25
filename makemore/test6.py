@@ -171,7 +171,11 @@ ones_max_logits = torch.zeros_like(logits).scatter(1, indices, 1.0)
 dlogits = ones_max_logits * dlogit_maxes + 1.0 * dnorm_logits  # should be 1 for each element that is the max in its row, 0 for others
 cmp('logits', dlogits, logits)
 
-# cmp('h', dh, h)
+# logits (32x27) = h (32x64) @ W2 (64x27) + b(27)
+# dh/dloss (32x64) = dlogits/dloss (32x27) @ transpose(W2) (27x64)
+dh = dlogits @ W2.transpose(0, 1)
+cmp('h', dh, h)
+
 # cmp('W2', dW2, W2)
 # cmp('b2', db2, b2)
 # cmp('hpreact', dhpreact, hpreact)
