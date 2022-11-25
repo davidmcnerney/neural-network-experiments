@@ -188,7 +188,9 @@ dhpreact = (torch.ones_like(h) - h ** 2) * dh
 # dhpreact = (1.0 - h**2) * dh    # Karpathy
 cmp('hpreact', dhpreact, hpreact)
 
-# cmp('bngain', dbngain, bngain)
+dbngain = (bnraw * dhpreact).sum(dim=0, keepdim=True)
+cmp('bngain', dbngain, bngain)
+
 # cmp('bnbias', dbnbias, bnbias)
 # cmp('bnraw', dbnraw, bnraw)
 # cmp('bnvar_inv', dbnvar_inv, bnvar_inv)
