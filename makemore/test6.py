@@ -223,10 +223,12 @@ cmp('embcat', dembcat, embcat)
 dW1 = embcat.transpose(0, 1) @ dhprebn
 cmp('W1', dW1, W1)
 
-db1 = dhprebn.sum(dim=1, keepdim=False)
+db1 = dhprebn.sum(dim=0, keepdim=False)
 cmp('b1', db1, b1)
 
+
 # cmp('emb', demb, emb)
+
 # cmp('C', dC, C)
 
 
