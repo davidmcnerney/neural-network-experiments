@@ -200,9 +200,15 @@ cmp('bnraw', dbnraw, bnraw)
 dbnvar_inv = (dbnraw * bndiff).sum(0, keepdim=True)
 cmp('bnvar_inv', dbnvar_inv, bnvar_inv)
 
-# cmp('bnvar', dbnvar, bnvar)
-# cmp('bndiff2', dbndiff2, bndiff2)
-# cmp('bndiff', dbndiff, bndiff)
+dbnvar = -0.5 * (bnvar + 1e-5) ** -1.5 * dbnvar_inv  # floating point issue?
+cmp('bnvar', dbnvar, bnvar)
+
+dbndiff2 = (1.0 / (n - 1.0)) * dbnvar.repeat(n, 1)  # floating point issue?
+cmp('bndiff2', dbndiff2, bndiff2)
+
+dbndiff = 2.0 * bndiff * dbndiff2 + bnvar_inv * dbnraw
+cmp('bndiff', dbndiff, bndiff)
+
 # cmp('bnmeani', dbnmeani, bnmeani)
 # cmp('hprebn', dhprebn, hprebn)
 # cmp('embcat', dembcat, embcat)
