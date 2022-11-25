@@ -226,8 +226,8 @@ cmp('W1', dW1, W1)
 db1 = dhprebn.sum(dim=0, keepdim=False)
 cmp('b1', db1, b1)
 
-
-# cmp('emb', demb, emb)
+demb = dembcat.view(emb.shape[0], emb.shape[1], emb.shape[2])
+cmp('emb', demb, emb)
 
 # cmp('C', dC, C)
 
