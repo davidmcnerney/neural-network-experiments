@@ -191,7 +191,9 @@ cmp('hpreact', dhpreact, hpreact)
 dbngain = (bnraw * dhpreact).sum(dim=0, keepdim=True)
 cmp('bngain', dbngain, bngain)
 
-# cmp('bnbias', dbnbias, bnbias)
+dbnbias = dhpreact.sum(dim=0, keepdim=True)
+cmp('bnbias', dbnbias, bnbias)
+
 # cmp('bnraw', dbnraw, bnraw)
 # cmp('bnvar_inv', dbnvar_inv, bnvar_inv)
 # cmp('bnvar', dbnvar, bnvar)
