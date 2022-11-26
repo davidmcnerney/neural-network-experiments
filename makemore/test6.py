@@ -229,7 +229,22 @@ cmp('b1', db1, b1)
 demb = dembcat.view(emb.shape[0], emb.shape[1], emb.shape[2])
 cmp('emb', demb, emb)
 
-# cmp('C', dC, C)
+# emb = C[Xb]
+# Takes Xb (32x3 char values 0-26) and C (27x10 char vector elements), maps to (32x3x10)
+# Influence of each element of C is just going to be the sum of all the dL/d_emb the corresponding positions in demb
+# Algo:
+#   - initialize dC to zeroes like C (27x10)
+#   - loop through all elements of Xb: x 0-31, y 0-2:
+#   -    obtain its element value 0-26 char:
+#   -    loop through that row in C: z 0-9:
+#   -        dC[char, z] += demb[x, y, z]
+dC = torch.zeros_like(C)
+for xB_row_index, xB_row_tensor in enumerate(Xb):  # loop thru training data points
+    for xB_col_index, xB_col_tensor in enumerate(xB_row_tensor):   # loop through previous characters
+        char_code = xB_col_tensor.item()
+        for C_col_index, _ in enumerate(C[char_code]):
+            dC[char_code, C_col_index] += demb[xB_row_index, xB_col_index, C_col_index]
+cmp('C', dC, C)
 
 
 # Exercise 2: backprop through cross_entropy but all in one go
