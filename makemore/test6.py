@@ -245,6 +245,12 @@ for xB_row_index, xB_row_tensor in enumerate(Xb):  # loop thru training data poi
         for C_col_index, _ in enumerate(C[char_code]):
             dC[char_code, C_col_index] += demb[xB_row_index, xB_col_index, C_col_index]
 cmp('C', dC, C)
+# Karpathy - much cleaner and easier to read
+# dC = torch.zeros_like(C)
+# for k in range(Xb.shape[0]):
+#     for j in range(Xb.shape[1]):
+#         ix = Xb[k, j]
+#         dC[ix] += demb[k, j]
 
 
 # Exercise 2: backprop through cross_entropy but all in one go
