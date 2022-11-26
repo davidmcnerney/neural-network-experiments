@@ -118,10 +118,10 @@ h = torch.tanh(hpreact) # hidden layer
 # Linear layer 2
 logits = h @ W2 + b2 # output layer
 # cross entropy loss (same as F.cross_entropy(logits, Yb))
-logit_maxes = logits.max(1, keepdim=True).values
+logit_maxes = logits.max(dim=1, keepdim=True).values
 norm_logits = logits - logit_maxes # subtract max for numerical stability
 counts = norm_logits.exp()
-counts_sum = counts.sum(1, keepdims=True)
+counts_sum = counts.sum(dim=1, keepdims=True)
 counts_sum_inv = counts_sum**-1 # if I use (1.0 / counts_sum) instead then I can't get backprop to be bit exact...
 probs = counts * counts_sum_inv
 logprobs = probs.log()
@@ -257,6 +257,10 @@ cmp('C', dC, C)
 # to complete this challenge look at the mathematical expression of the loss,
 # take the derivative, simplify the expression, and just write it out
 
+# Cross entropy:
+# e^x on logits - row max value -> "counts"
+# normalize by dividing each element by row sum -> "probs"
+# take average of prob for expected char column, negate -> "loss
 
 # Exercise 3: backprop through batchnorm but all in one go
 # to complete this challenge look at the mathematical expression of the output of batchnorm,
