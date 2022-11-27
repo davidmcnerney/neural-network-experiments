@@ -263,8 +263,8 @@ print("Training complete.")
 # Plots and reports
 
 # Losses
-chunked_losses = torch.tensor(losses).view(-1, 1000).mean(dim=1, keepdim=False).tolist()
-plt.figure(figsize=(18, 5))
+chunked_losses = torch.tensor(losses).view(-1, 500).mean(dim=1, keepdim=False).tolist()
+plt.figure(figsize=(25, 7))
 plt.title("Loss")
 plt.plot(chunked_losses)
 plt.show()
