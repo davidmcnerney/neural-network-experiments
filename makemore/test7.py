@@ -18,11 +18,11 @@ BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict wi
 CHARACTER_DIMENSIONS = 10  # how many numbers we use to represent a character
 LAYER_COUNT_NEURONS = 200
 
-TRAINING_CYCLES = 200000
+TRAINING_CYCLES = 50000 # 200000
 BATCH_SIZE = 32
 LEARNING_RATE_1 = 0.1
 LEARNING_RATE_2 = 0.01
-LEARNING_RATE_TRANSITION_AT_CYCLE = 150000
+LEARNING_RATE_TRANSITION_AT_CYCLE = 40000 # 150000
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -264,7 +264,7 @@ print("Training complete.")
 
 # Losses
 chunked_losses = torch.tensor(losses).view(-1, 1000).mean(dim=1, keepdim=False).tolist()
-plt.figure(figsize=(100, 15))
+plt.figure(figsize=(18, 5))
 plt.title("Loss")
 plt.plot(chunked_losses)
 plt.show()
