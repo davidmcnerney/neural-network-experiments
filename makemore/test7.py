@@ -31,6 +31,34 @@ EDGE_MARKER = "."  # depends on this character not appearing in the names.txt fi
 generator = torch.Generator().manual_seed(2147483647)
 
 
+class Embedding:
+    """
+    For example: Embedding(27, 10) maps char codes 0-26 each to its own separately trained 10 element vector
+    """
+    def __init__(self, num_embedded_values, embedding_dim):
+        self.weight = torch.randn((num_embedded_values, embedding_dim), generator=generator)
+
+    def __call__(self, x):
+        self.out = self.weight[x]
+        return self.out
+
+    def parameters(self):
+        return [self.weight]
+
+
+class Flatten:
+    """
+    For example, turns a 32x3x10 3D tensor into 32x30, concating together all 3 of the 10 element vectors for
+    each row.
+    """
+    def __call__(self, x):
+        self.out = x.view(x.shape[0], -1)
+        return self.out
+
+    def parameters(self):
+        return []
+
+
 class Linear:
     def __init__(self, in_features: int, out_features: int, bias: bool = True):
         self.weight = torch.randn((in_features, out_features), generator=generator) / in_features ** 0.5
@@ -170,13 +198,10 @@ print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_te
 
 # Build the network
 
-# Initial lookup matrix
-# Maps character code one-hot vectors to vectors of CHARACTER_DIMENSIONS size
-# Each row N is the vector for character N, so you can directly index as well
-C = torch.randn((charset_size, CHARACTER_DIMENSIONS),                          generator=generator)
-
 # Layers
 layers = [
+    Embedding(charset_size, CHARACTER_DIMENSIONS),
+    Flatten(),
     Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
     Linear(              LAYER_COUNT_NEURONS, charset_size),
 ]
@@ -189,16 +214,15 @@ with torch.no_grad():  # don't understand why do this here
 # Require grad for our leaf parameters.
 # Must be done before the forward pass, in order for the operations we perform to have a grad function
 # attached to them
-parameters = [C] + [p for l in layers for p in l.parameters()]
+parameters = [p for l in layers for p in l.parameters()]
 for p in parameters:
     p.requires_grad = True
 print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the model.")
 
 
 def logits_for_x(X_: torch.Tensor) -> torch.Tensor:
-    input_vectors = C[X_]
-    x = input_vectors.view(-1, CHARACTER_DIMENSIONS * BLOCK_SIZE)
     # plt.hist(x.view(-1).tolist(), 50); plt.show()
+    x = X_
     for layer in layers:
         x = layer(x)
         # plt.hist(x.view(-1).tolist(), 50); plt.show()
@@ -354,7 +378,7 @@ for _ in range(10):
     out_codes = []
     current_chars = [0] * BLOCK_SIZE
     while True:
-        logits = logits_for_x(current_chars)
+        logits = logits_for_x(torch.tensor([current_chars]))
         probs = F.softmax(logits, dim=1)
         next_char = torch.multinomial(probs, num_samples=1, generator=generator2).item()
         if next_char == 0:
