@@ -18,11 +18,11 @@ BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict wi
 CHARACTER_DIMENSIONS = 10  # how many numbers we use to represent a character
 LAYER_COUNT_NEURONS = 200
 
-TRAINING_CYCLES = 20000
+TRAINING_CYCLES = 200000
 BATCH_SIZE = 32
 LEARNING_RATE_1 = 0.1
 LEARNING_RATE_2 = 0.01
-LEARNING_RATE_TRANSITION_AT_CYCLE = 10000
+LEARNING_RATE_TRANSITION_AT_CYCLE = 150000
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -34,6 +34,7 @@ generator = torch.Generator().manual_seed(2147483647)
 class Linear:
     def __init__(self, in_features: int, out_features: int, bias: bool = True):
         self.weight = torch.randn((in_features, out_features), generator=generator) / in_features ** 0.5
+        self.bias = None
         if bias:
             self.bias = torch.zeros(out_features)
         self.out: Optional[torch.tensor] = None
@@ -62,7 +63,8 @@ class BatchNorm1d:
         self.gamma = torch.ones(dim)
         self.beta = torch.zeros(dim)
 
-        # Initialize buffers: we capture average mean and variance while training, for use in inference later
+        # Initialize buffers: we capture average mean and variance per column (neuron)
+        # while training, for use in inference later
         self.running_mean = torch.zeros(dim)
         self.running_variance = torch.ones(dim)
 
@@ -79,7 +81,7 @@ class BatchNorm1d:
         x_normalized = (x - mean) / torch.sqrt(variance + self.eps)
         self.out = self.gamma * x_normalized + self.beta
 
-        # Update buffers: our running mean and variance
+        # Update buffers: our running batch-independent mean and variance
         if self.training:
             with torch.no_grad():
                 self.running_mean = (1.0 - self.momentum) * self.running_mean + self.momentum * mean
@@ -175,16 +177,11 @@ C = torch.randn((charset_size, CHARACTER_DIMENSIONS),                          g
 
 # Layers
 layers = [
-    Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
     Linear(              LAYER_COUNT_NEURONS, charset_size),
 ]
 
 with torch.no_grad():  # don't understand why do this here
-    # Apple gain to all layers but the last
-    for layer in layers[:-1]:
-        if isinstance(layer, Linear):
-            layer.weight *= 5.0 / 3.0
-
     # Make last layer less "confident"
     layers[-1].weight *= 0.1
 
@@ -266,7 +263,11 @@ print("Training complete.")
 # Plots and reports
 
 # Losses
-plt.plot(losses); plt.show()
+chunked_losses = torch.tensor(losses).view(-1, 1000).mean(dim=1, keepdim=False).tolist()
+plt.figure(figsize=(100, 15))
+plt.title("Loss")
+plt.plot(chunked_losses)
+plt.show()
 
 # # Activations
 # plt.figure(figsize=(100, 15))
