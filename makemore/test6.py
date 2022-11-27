@@ -260,7 +260,10 @@ cmp('C', dC, C)
 # Cross entropy:
 # e^x on logits - row max value -> "counts"
 # normalize by dividing each element by row sum -> "probs"
-# take average of prob for expected char column, negate -> "loss
+# take average of prob for expected char column, negate -> "loss"
+#    this is all elementwise operations and size stays 32x27 until we squash to 32x1 at the end
+
+
 
 # Exercise 3: backprop through batchnorm but all in one go
 # to complete this challenge look at the mathematical expression of the output of batchnorm,
