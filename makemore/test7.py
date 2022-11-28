@@ -133,8 +133,14 @@ class BatchNorm1d(Layer):
     def __call__(self, x) -> torch.Tensor:
         if self.training:
             # Compute batch mean and variance during training
-            mean = x.mean(dim=0, keepdim=True)
-            variance = x.var(dim=0, keepdim=True)
+            if x.ndim == 2:
+                dim = 0
+            elif x.ndim == 3:
+                dim = (0, 1)
+            else:
+                raise Exception("Unexpected")
+            mean = x.mean(dim=dim, keepdim=True)
+            variance = x.var(dim=dim, keepdim=True)
         else:
             # Use previously captured average mean and variance in evaluation mode
             mean = self.running_mean
