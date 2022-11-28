@@ -31,35 +31,60 @@ EDGE_MARKER = "."  # depends on this character not appearing in the names.txt fi
 generator = torch.Generator().manual_seed(2147483647)
 
 
-class Embedding:
+class Sequential:
+    """
+    Model class to hold your layers
+    """
+    def __init__(self, layers: List["Layer"]):
+        self.layers = layers
+
+    def __call__(self, x) -> torch.Tensor:
+        for layer in self.layers:
+            x = layer(x)
+        self.out = x
+        return self.out
+
+    def parameters(self) -> List[torch.Tensor]:
+        return [p for l in self.layers for p in l.parameters()]
+
+
+class Layer:
+    def __call__(self, x) -> torch.Tensor:
+        raise NotImplementedError
+
+    def parameters(self) -> List[torch.Tensor]:
+        raise NotImplementedError
+
+
+class Embedding(Layer):
     """
     For example: Embedding(27, 10) maps char codes 0-26 each to its own separately trained 10 element vector
     """
-    def __init__(self, num_embedded_values, embedding_dim):
+    def __init__(self, num_embedded_values: int, embedding_dim: int):
         self.weight = torch.randn((num_embedded_values, embedding_dim), generator=generator)
 
-    def __call__(self, x):
+    def __call__(self, x) -> torch.Tensor:
         self.out = self.weight[x]
         return self.out
 
-    def parameters(self):
+    def parameters(self) -> List[torch.Tensor]:
         return [self.weight]
 
 
-class Flatten:
+class Flatten(Layer):
     """
     For example, turns a 32x3x10 3D tensor into 32x30, concating together all 3 of the 10 element vectors for
     each row.
     """
-    def __call__(self, x):
+    def __call__(self, x) -> torch.Tensor:
         self.out = x.view(x.shape[0], -1)
         return self.out
 
-    def parameters(self):
+    def parameters(self) -> List[torch.Tensor]:
         return []
 
 
-class Linear:
+class Linear(Layer):
     def __init__(self, in_features: int, out_features: int, bias: bool = True):
         self.weight = torch.randn((in_features, out_features), generator=generator) / in_features ** 0.5
         self.bias = None
@@ -80,7 +105,7 @@ class Linear:
         return return_value
 
 
-class BatchNorm1d:
+class BatchNorm1d(Layer):
     def __init__(self, dim, eps: float = 1e-5, momentum: float = 0.1):
         self.eps = eps            # small constant to prevent divide by zero errors
         self.momentum = momentum  # how quickly running_mean and running_var update
@@ -121,7 +146,7 @@ class BatchNorm1d:
         return [self.gamma, self.beta]
 
 
-class Tanh:
+class Tanh(Layer):
     def __call__(self, x) -> torch.Tensor:
         self.out = torch.tanh(x)
         return self.out
@@ -196,47 +221,38 @@ X_test, Y_test = data_for_names(names[n2:])
 print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_test.shape[0]}")
 
 
-# Build the network
+# Build the model
 
-# Layers
-layers = [
+model = Sequential([
     Embedding(charset_size, CHARACTER_DIMENSIONS),
     Flatten(),
     Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
     Linear(              LAYER_COUNT_NEURONS, charset_size),
-]
+])
 
-with torch.no_grad():  # don't understand why do this here
+with torch.no_grad():  # so that we don't add this operation to the computational graph?
     # Make last layer less "confident"
-    layers[-1].weight *= 0.1
+    last_layer: Linear = model.layers[-1]
+    last_layer.weight *= 0.1
 
 
 # Require grad for our leaf parameters.
 # Must be done before the forward pass, in order for the operations we perform to have a grad function
 # attached to them
-parameters = [p for l in layers for p in l.parameters()]
+parameters = model.parameters()
 for p in parameters:
     p.requires_grad = True
 print(f"{sum(p.nelement() for p in parameters)} trainable parameters in the model.")
 
 
-def logits_for_x(X_: torch.Tensor) -> torch.Tensor:
-    # plt.hist(x.view(-1).tolist(), 50); plt.show()
-    x = X_
-    for layer in layers:
-        x = layer(x)
-        # plt.hist(x.view(-1).tolist(), 50); plt.show()
-    return x
-
-
 def forward_pass(X_: torch.Tensor, Y_: torch.Tensor) -> torch.Tensor:
-    logits_ = logits_for_x(X_)
+    logits_ = model(X_)
     loss_ = F.cross_entropy(logits_, Y_)
     return loss_
 
 
 def backward_pass(loss_: torch.Tensor, learning_rate: float) -> None:
-    # for layer_ in layers:
+    # for layer_ in model.layers:
     #     layer_.out.retain_grad()
 
     for p in parameters:
@@ -298,7 +314,7 @@ plt.show()
 # legends = []
 # print("")
 # print("Activations:")
-# for i, layer in enumerate(layers[:-1]):
+# for i, layer in enumerate(model.layers[:-1]):
 #     if isinstance(layer, Tanh):
 #         t = layer.out
 #         saturation = (t.abs() > 0.97).float().mean().item() * 100.0
@@ -316,7 +332,7 @@ plt.show()
 # legends = []
 # print("")
 # print("Gradients:")
-# for i, layer in enumerate(layers[:-1]):
+# for i, layer in enumerate(model.layers[:-1]):
 #     if isinstance(layer, Linear):
 #         t = layer.out.grad
 #         print(f"layer {i} ({layer.__class__.__name__}): mean {t.mean():.2} std {t.std():.2}")
@@ -361,7 +377,7 @@ plt.show()
 
 
 # Turn off training mode in the layers
-for layer in layers:
+for layer in model.layers:
     layer.training = False
 
 # Forward pass with the different slices
@@ -378,7 +394,7 @@ for _ in range(10):
     out_codes = []
     current_chars = [0] * BLOCK_SIZE
     while True:
-        logits = logits_for_x(torch.tensor([current_chars]))
+        logits = model(torch.tensor([current_chars]))
         probs = F.softmax(logits, dim=1)
         next_char = torch.multinomial(probs, num_samples=1, generator=generator2).item()
         if next_char == 0:
