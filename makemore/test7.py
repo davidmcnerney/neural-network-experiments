@@ -71,13 +71,22 @@ class Embedding(Layer):
         return [self.weight]
 
 
-class Flatten(Layer):
+class FlattenConsecutive(Layer):
     """
     For example, turns a 32x3x10 3D tensor into 32x30, concating together all 3 of the 10 element vectors for
     each row.
     """
+    def __init__(self, num_to_concat: int):
+        self.num_to_concat = num_to_concat
+
     def __call__(self, x) -> torch.Tensor:
-        self.out = x.view(x.shape[0], -1)
+        dim1 = x.shape[0]  # unchanged
+        dim2 = x.shape[1] // self.num_to_concat
+        dim3 = x.shape[2] * self.num_to_concat
+        if dim2 == 1:
+            self.out = x.view(dim1, dim3)
+        else:
+            self.out = x.view(dim1, dim2, dim3)
         return self.out
 
     def parameters(self) -> List[torch.Tensor]:
@@ -225,7 +234,7 @@ print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_te
 
 model = Sequential([
     Embedding(charset_size, CHARACTER_DIMENSIONS),
-    Flatten(),
+    FlattenConsecutive(num_to_concat=8),
     Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
     Linear(              LAYER_COUNT_NEURONS, charset_size),
 ])
