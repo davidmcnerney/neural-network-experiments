@@ -1,6 +1,6 @@
 import random
 import sys
-from typing import Dict, List, Optional, Set, Tuple
+from typing import cast, Dict, List, Optional, Set, Tuple
 
 import matplotlib.pyplot as plt
 import torch
@@ -232,7 +232,7 @@ model = Sequential([
 
 with torch.no_grad():  # so that we don't add this operation to the computational graph?
     # Make last layer less "confident"
-    last_layer: Linear = model.layers[-1]
+    last_layer = cast(Linear, model.layers[-1])
     last_layer.weight *= 0.1
 
 
