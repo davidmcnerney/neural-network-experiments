@@ -15,8 +15,8 @@ from torch.nn import functional as F
 LIMIT_INPUT_NAMES = None
 
 BLOCK_SIZE = 8  # how many preceding characters we use as X inputs to predict with
-CHARACTER_DIMENSIONS = 10  # how many numbers we use to represent a character
-LAYER_COUNT_NEURONS = 68
+CHARACTER_DIMENSIONS = 24  # how many numbers we use to represent a character
+LAYER_COUNT_NEURONS = 128
 
 TRAINING_CYCLES = 200000
 BATCH_SIZE = 32
