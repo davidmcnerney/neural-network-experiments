@@ -16,7 +16,7 @@ LIMIT_INPUT_NAMES = None
 
 BLOCK_SIZE = 8  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 10  # how many numbers we use to represent a character
-LAYER_COUNT_NEURONS = 200
+LAYER_COUNT_NEURONS = 68
 
 TRAINING_CYCLES = 200000
 BATCH_SIZE = 32
@@ -234,9 +234,10 @@ print(f"Data set: training={X_training.shape[0]} dev={X_dev.shape[0]} test={X_te
 
 model = Sequential([
     Embedding(charset_size, CHARACTER_DIMENSIONS),
-    FlattenConsecutive(num_to_concat=8),
-    Linear(CHARACTER_DIMENSIONS * BLOCK_SIZE, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
-    Linear(              LAYER_COUNT_NEURONS, charset_size),
+    FlattenConsecutive(num_to_concat=2), Linear(CHARACTER_DIMENSIONS * 2, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    FlattenConsecutive(num_to_concat=2), Linear(LAYER_COUNT_NEURONS * 2, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    FlattenConsecutive(num_to_concat=2), Linear(LAYER_COUNT_NEURONS * 2, LAYER_COUNT_NEURONS, bias=False), BatchNorm1d(LAYER_COUNT_NEURONS), Tanh(),
+    Linear(LAYER_COUNT_NEURONS, charset_size),
 ])
 
 with torch.no_grad():  # so that we don't add this operation to the computational graph?
