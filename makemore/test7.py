@@ -14,15 +14,15 @@ from torch.nn import functional as F
 
 LIMIT_INPUT_NAMES = None
 
-BLOCK_SIZE = 3  # how many preceding characters we use as X inputs to predict with
+BLOCK_SIZE = 8  # how many preceding characters we use as X inputs to predict with
 CHARACTER_DIMENSIONS = 10  # how many numbers we use to represent a character
 LAYER_COUNT_NEURONS = 200
 
-TRAINING_CYCLES = 50000 # 200000
+TRAINING_CYCLES = 200000
 BATCH_SIZE = 32
 LEARNING_RATE_1 = 0.1
 LEARNING_RATE_2 = 0.01
-LEARNING_RATE_TRANSITION_AT_CYCLE = 40000 # 150000
+LEARNING_RATE_TRANSITION_AT_CYCLE = 150000
 
 # Misc constants
 EDGE_MARKER = "."  # depends on this character not appearing in the names.txt file
@@ -303,7 +303,7 @@ print("Training complete.")
 # Plots and reports
 
 # Losses
-chunked_losses = torch.tensor(losses).view(-1, 500).mean(dim=1, keepdim=False).tolist()
+chunked_losses = torch.tensor(losses).view(-1, 1000).mean(dim=1, keepdim=False).tolist()
 plt.figure(figsize=(25, 7))
 plt.title("Loss")
 plt.plot(chunked_losses)
