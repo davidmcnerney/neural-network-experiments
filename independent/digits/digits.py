@@ -71,6 +71,7 @@ model = nn.Sequential(
 criterion = nn.NLLLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
 start_time = datetime.now()
+print("Training ...")
 for e in range(epochs):
     running_loss = 0
     for images, labels in training_loader:
