@@ -4,6 +4,10 @@ import torch.utils.data
 from torchvision import datasets, transforms
 
 
+# Reproducibility
+torch.manual_seed(2147483647)
+
+
 # Load training and test data
 loading_transform = transforms.Compose([
     transforms.ToTensor(),
@@ -32,5 +36,5 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=T
 # image = images[0]
 # plt.imshow(image.squeeze(), cmap='gray_r')
 # plt.show()
-#
+
 
