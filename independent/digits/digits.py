@@ -10,13 +10,13 @@ loading_transform = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,)),
 ])
 training_dataset = datasets.MNIST(
-    "PATH_TO_STORE_TRAINSET",
+    "/Users/dave/Temp/datasets/MNIST_TRAIN",
     download=True,
     train=True,
     transform=loading_transform,
 )
 test_dataset = datasets.MNIST(
-    "PATH_TO_STORE_TESTSET",
+    "/Users/dave/Temp/datasets/MNIST_TEST",
     download=True,
     train=False,
     transform=loading_transform,
@@ -32,5 +32,5 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=T
 # image = images[0]
 # plt.imshow(image.squeeze(), cmap='gray_r')
 # plt.show()
-
+#
 
