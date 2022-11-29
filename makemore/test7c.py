@@ -85,11 +85,6 @@ def data_for_names(names_: List[str]) -> Tuple[torch.Tensor, torch.Tensor]:
 # We divide our names data set up into 3 subsets: 80% for training, 10% for dev testing, and 10% for final test
 random.seed(42)
 random.shuffle(names)
-# count_dev = max(int(len(names) * 0.1), 1)
-# count_test = count_dev
-# count_training = len(names) - count_dev - count_test
-# n1 = count_training
-# n2 = count_training + count_dev
 n1 = int(0.8*len(names))
 n2 = int(0.9*len(names))
 X_training, Y_training = data_for_names(names[:n1])
@@ -116,6 +111,7 @@ with torch.no_grad():  # so that we don't add this operation to the computationa
 # Must be done before the forward pass, in order for the operations we perform to have a grad function
 # attached to them
 model.requires_grad_(True)
+
 print(f"{sum(p.nelement() for p in model.parameters())} trainable parameters in the model.")
 
 
