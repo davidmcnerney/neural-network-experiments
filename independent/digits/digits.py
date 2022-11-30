@@ -12,6 +12,7 @@ from torchvision import datasets, transforms
 
 
 # Hyperparameters
+do_training = False
 input_size = 784
 hidden_sizes = [128, 64]
 output_size = 10
@@ -47,7 +48,7 @@ training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=64, s
 test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True)
 
 
-# # Inspect
+# # Inspect data
 # images, labels = next(iter(training_loader))
 # print(images.shape)
 # print(labels.shape)
@@ -56,45 +57,66 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=T
 # plt.show()
 
 
-# Construct neural net
-model = nn.Sequential(
-    nn.Linear(input_size, hidden_sizes[0]),
-    nn.ReLU(),
-    nn.Linear(hidden_sizes[0], hidden_sizes[1]),
-    nn.ReLU(),
-    nn.Linear(hidden_sizes[1], output_size),
-    nn.LogSoftmax(dim=1)
-)
+if do_training:
+    # Construct neural net
+    model = nn.Sequential(
+        nn.Linear(input_size, hidden_sizes[0]),
+        nn.ReLU(),
+        nn.Linear(hidden_sizes[0], hidden_sizes[1]),
+        nn.ReLU(),
+        nn.Linear(hidden_sizes[1], output_size),
+        nn.LogSoftmax(dim=1)
+    )
+
+    # Train the model
+    print("Training ...")
+    criterion = nn.NLLLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    start_time = datetime.now()
+    for e in range(epochs):
+        running_loss = 0
+        for images, labels in training_loader:
+            # Flatten MNIST images into a 784 long vector
+            images = images.view(images.shape[0], -1)
+
+            # Training pass
+            optimizer.zero_grad()
+
+            output = model(images)
+            loss = criterion(output, labels)
+
+            #This is where the model learns by backpropagating
+            loss.backward()
+
+            #And optimizes its weights here
+            optimizer.step()
+
+            running_loss += loss.item()
+        else:
+            print("Epoch {} - Training loss: {}".format(e, running_loss/len(training_loader)))
+    print(f"Training time: {datetime.now() - start_time}")
+    print("")
+
+    # Save model
+    torch.save(model, model_save_path)
+else:
+    # Load previously saved model
+    model = torch.load(model_save_path)
 
 
-# Training
-criterion = nn.NLLLoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-start_time = datetime.now()
-print("Training ...")
-for e in range(epochs):
-    running_loss = 0
-    for images, labels in training_loader:
-        # Flatten MNIST images into a 784 long vector
-        images = images.view(images.shape[0], -1)
-
-        # Training pass
-        optimizer.zero_grad()
-
-        output = model(images)
-        loss = criterion(output, labels)
-
-        #This is where the model learns by backpropagating
-        loss.backward()
-
-        #And optimizes its weights here
-        optimizer.step()
-
-        running_loss += loss.item()
-    else:
-        print("Epoch {} - Training loss: {}".format(e, running_loss/len(training_loader)))
-print("\nTraining time: ", (datetime.now() - start_time))
-
-
-# Save model
-torch.save(model, model_save_path)
+# Check loss and accuracy on test data
+print("Testing ...")
+model.train(mode=False)
+correct_count, all_count = 0, 0
+for images, labels in test_loader:
+    for i in range(len(labels)):
+        image = images[i].view(1, 784)
+        with torch.no_grad():
+            output = model(image)
+        probs = torch.exp(output)
+        predicted_digit = probs.argmax().item()
+        labelled_digit = labels[i].item()
+        if(predicted_digit == labelled_digit):
+            correct_count += 1
+        all_count += 1
+print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
