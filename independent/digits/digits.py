@@ -1,9 +1,9 @@
 from datetime import datetime
 
-import matplotlib.pyplot as plt
-import torch
+# import matplotlib.pyplot as plt
+# import torch
 from torch import nn
-import torch.optim
+from torch.optim import SGD
 import torch.utils.data
 from torchvision import datasets, transforms
 
@@ -12,11 +12,12 @@ from torchvision import datasets, transforms
 
 
 # Hyperparameters
-do_training = False
+do_training = True
 input_size = 784
 hidden_sizes = [128, 64]
 output_size = 10
-epochs = 15
+epochs = 60
+batch_size = 32
 learning_rate = 0.003
 momentum = 0.9  # not sure what this is for
 
@@ -44,8 +45,8 @@ test_dataset = datasets.MNIST(
     train=False,
     transform=loading_transform,
 )
-training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=64, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=64, shuffle=True)
+training_loader = torch.utils.data.DataLoader(training_dataset, batch_size=batch_size, shuffle=True)
+test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
 
 # # Inspect data
@@ -71,29 +72,21 @@ if do_training:
     # Train the model
     print("Training ...")
     criterion = nn.NLLLoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    optimizer = SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     start_time = datetime.now()
-    for e in range(epochs):
-        running_loss = 0
+    for epoch_num in range(epochs):
+        # print(f"   starting epoch {epoch_num}")
+        epoch_total_loss = 0
         for images, labels in training_loader:
-            # Flatten MNIST images into a 784 long vector
+            # print(f"      got {len(images)} images from training loader")
             images = images.view(images.shape[0], -1)
-
-            # Training pass
             optimizer.zero_grad()
-
             output = model(images)
             loss = criterion(output, labels)
-
-            #This is where the model learns by backpropagating
             loss.backward()
-
-            #And optimizes its weights here
             optimizer.step()
-
-            running_loss += loss.item()
-        else:
-            print("Epoch {} - Training loss: {}".format(e, running_loss/len(training_loader)))
+            epoch_total_loss += loss.item()
+        print(f"      epoch {epoch_num} training loss {epoch_total_loss / len(training_loader)}")
     print(f"Training time: {datetime.now() - start_time}")
     print("")
 
