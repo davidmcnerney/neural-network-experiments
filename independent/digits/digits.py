@@ -12,8 +12,7 @@ from torchvision import datasets, transforms
 
 
 # Hyperparameters
-do_training = True
-input_size = 784
+do_training = False
 hidden_sizes = [128, 64]
 output_size = 10
 epochs = 60
@@ -61,11 +60,18 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, s
 if do_training:
     # Construct neural net
     model = nn.Sequential(
-        nn.Linear(input_size, hidden_sizes[0]),
+        nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
         nn.ReLU(),
-        nn.Linear(hidden_sizes[0], hidden_sizes[1]),
+        nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
+        nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 6x12x12 -> 16x8x8
         nn.ReLU(),
-        nn.Linear(hidden_sizes[1], output_size),
+        nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
+        nn.Flatten(),                                               # 256
+        nn.Linear(256, hidden_sizes[0]),                            # 128
+        nn.ReLU(),
+        nn.Linear(hidden_sizes[0], hidden_sizes[1]),                # 64
+        nn.ReLU(),
+        nn.Linear(hidden_sizes[1], output_size),                    # 10
         nn.LogSoftmax(dim=1)
     )
 
@@ -79,7 +85,6 @@ if do_training:
         epoch_total_loss = 0
         for images, labels in training_loader:
             # print(f"      got {len(images)} images from training loader")
-            images = images.view(images.shape[0], -1)
             optimizer.zero_grad()
             output = model(images)
             loss = criterion(output, labels)
@@ -103,9 +108,10 @@ model.train(mode=False)
 correct_count, all_count = 0, 0
 for images, labels in test_loader:
     for i in range(len(labels)):
-        image = images[i].view(1, 784)
+        image = images[i]
+        input_ = torch.unsqueeze(image, 0)
         with torch.no_grad():
-            output = model(image)
+            output = model(input_)
         probs = torch.exp(output)
         predicted_digit = probs.argmax().item()
         labelled_digit = labels[i].item()
