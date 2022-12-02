@@ -18,7 +18,7 @@ from torchvision.transforms import functional as transforms_functional
 do_training = True
 hidden_sizes = [128, 64]
 output_size = 10
-epochs = 15
+epochs = 60
 batch_size = 32
 learning_rate = 0.003
 momentum = 0.9
