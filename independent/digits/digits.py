@@ -8,22 +8,23 @@ from torch import nn
 from torch.optim import SGD
 import torch.utils.data
 from torchvision import datasets, io as torchvision_io, transforms
+from torchvision.transforms import functional as transforms_functional
 
 
 # https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
 
 
 # Hyperparameters
-do_training = False
+do_training = True
 hidden_sizes = [128, 64]
 output_size = 10
-epochs = 60
+epochs = 15
 batch_size = 32
 learning_rate = 0.003
-momentum = 0.9  # not sure what this is for
+momentum = 0.9
 
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
-model_save_file = "/Users/dave/Temp/neural_net_training/models/digits.pt"
+model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
 
 
 # Reproducibility
@@ -32,17 +33,21 @@ torch.manual_seed(2147483647)
 
 # Load training and test data
 loading_transform = transforms.Compose([
+    lambda img: transforms_functional.rotate(img, -90),
+    lambda img: transforms_functional.hflip(img),
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,)),
 ])
-training_dataset = datasets.MNIST(
-    dataset_save_folder + "/MNIST_TRAIN",
+training_dataset = datasets.EMNIST(
+    dataset_save_folder + "/EMNIST_TRAIN",
+    split="digits",
     download=True,
     train=True,
     transform=loading_transform,
 )
-test_dataset = datasets.MNIST(
-    dataset_save_folder + "/MNIST_TEST",
+test_dataset = datasets.EMNIST(
+    dataset_save_folder + "/EMNIST_TEST",
+    split="digits",
     download=True,
     train=False,
     transform=loading_transform,
@@ -94,6 +99,12 @@ if do_training:
             loss.backward()
             optimizer.step()
             epoch_total_loss += loss.item()
+
+            # for image, label in zip(images, labels):
+            #     if label == 9:
+            #         plt.imshow(image.permute(1, 2, 0))
+            #         plt.title(str(label.item()))
+            #         plt.show()
         print(f"      epoch {epoch_num} training loss {epoch_total_loss / len(training_loader)}")
     print(f"Training time: {datetime.now() - start_time}")
     print("")
@@ -107,23 +118,27 @@ else:
     model = torch.load(model_save_file)
 
 
-# # Check loss and accuracy on test portion of dataset
-# print("Testing against test portion of dataset ...")
-# correct_count, all_count = 0, 0
-# for images, labels in test_loader:
-#     for i in range(len(labels)):
-#         image = images[i]
-#         input_ = torch.unsqueeze(image, 0)
-#         with torch.no_grad():
-#             output = model(input_)
-#         probs = torch.exp(output)
-#         predicted_digit = probs.argmax().item()
-#         labelled_digit = labels[i].item()
-#         if(predicted_digit == labelled_digit):
-#             correct_count += 1
-#         all_count += 1
-#     # break  # temp!
-# print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
+# Check loss and accuracy on test portion of dataset
+print("Testing against test portion of dataset ...")
+correct_count, all_count = 0, 0
+for images, labels in test_loader:
+    for i in range(len(labels)):
+        image = images[i]
+        input_ = torch.unsqueeze(image, 0)
+        with torch.no_grad():
+            output = model(input_)
+        probs = torch.exp(output)
+        predicted_digit = probs.argmax().item()
+        labelled_digit = labels[i].item()
+        if(predicted_digit == labelled_digit):
+            correct_count += 1
+        all_count += 1
+
+        # plt.imshow(image.permute(1, 2, 0))
+        # plt.title(str(labelled_digit))
+        # plt.show()
+    # break  # temp!
+print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
 
 
 # Try to recognize additional images from outside the dataset
