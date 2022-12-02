@@ -5,7 +5,7 @@ from datetime import datetime
 from torch import nn
 from torch.optim import SGD
 import torch.utils.data
-from torchvision import datasets, transforms
+from torchvision import datasets, io as torchvision_io, transforms
 
 
 # https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
@@ -97,25 +97,40 @@ if do_training:
 
     # Save model
     torch.save(model, model_save_path)
+
+    model.train(mode=False)
 else:
     # Load previously saved model
     model = torch.load(model_save_path)
 
 
-# Check loss and accuracy on test data
-print("Testing ...")
-model.train(mode=False)
-correct_count, all_count = 0, 0
-for images, labels in test_loader:
-    for i in range(len(labels)):
-        image = images[i]
-        input_ = torch.unsqueeze(image, 0)
-        with torch.no_grad():
-            output = model(input_)
-        probs = torch.exp(output)
-        predicted_digit = probs.argmax().item()
-        labelled_digit = labels[i].item()
-        if(predicted_digit == labelled_digit):
-            correct_count += 1
-        all_count += 1
-print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
+# # Check loss and accuracy on test portion of dataset
+# print("Testing against test portion of dataset ...")
+# correct_count, all_count = 0, 0
+# for images, labels in test_loader:
+#     for i in range(len(labels)):
+#         image = images[i]
+#         input_ = torch.unsqueeze(image, 0)
+#         with torch.no_grad():
+#             output = model(input_)
+#         probs = torch.exp(output)
+#         predicted_digit = probs.argmax().item()
+#         labelled_digit = labels[i].item()
+#         if(predicted_digit == labelled_digit):
+#             correct_count += 1
+#         all_count += 1
+# print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
+
+
+# Try to recognize additional images from outside the dataset
+print("Testing additional images ...")
+image_1 = torchvision_io.read_image(
+    path="/Users/dave/Temp/New images/1.png",
+    mode=torchvision_io.ImageReadMode.GRAY,
+).float() / 255.
+input_ = torch.unsqueeze(image_1, 0)
+with torch.no_grad():
+    output = model(input_)
+probs = torch.exp(output)
+predicted_digit = probs.argmax().item()
+print(f"Predicted digit: {predicted_digit}")
