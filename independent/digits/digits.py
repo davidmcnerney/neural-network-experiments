@@ -22,7 +22,8 @@ batch_size = 32
 learning_rate = 0.003
 momentum = 0.9  # not sure what this is for
 
-model_save_path = "/Users/dave/Temp/models/test7c.pt"
+dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
+model_save_file = "/Users/dave/Temp/neural_net_training/models/digits.pt"
 
 
 # Reproducibility
@@ -35,13 +36,13 @@ loading_transform = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,)),
 ])
 training_dataset = datasets.MNIST(
-    "/Users/dave/Temp/datasets/MNIST_TRAIN",
+    dataset_save_folder + "/MNIST_TRAIN",
     download=True,
     train=True,
     transform=loading_transform,
 )
 test_dataset = datasets.MNIST(
-    "/Users/dave/Temp/datasets/MNIST_TEST",
+    dataset_save_folder + "/MNIST_TEST",
     download=True,
     train=False,
     transform=loading_transform,
@@ -98,12 +99,12 @@ if do_training:
     print("")
 
     # Save model
-    torch.save(model, model_save_path)
+    torch.save(model, model_save_file)
 
     model.train(mode=False)
 else:
     # Load previously saved model
-    model = torch.load(model_save_path)
+    model = torch.load(model_save_file)
 
 
 # # Check loss and accuracy on test portion of dataset
