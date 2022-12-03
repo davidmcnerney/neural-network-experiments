@@ -199,7 +199,7 @@ if evaluate_additional:
     print(f"   Tested {all_count} additional images: loss {round(loss.item(), 5)}, model accuracy {additional_images_accuracy}%, lowest prob {round(lowest_prob, 4)}")
 
 
-# Summary for git commit messages
+# Summary for git commit messages 
 if test_loss is not None and additional_images_accuracy is not None:
     model_filename = Path(model_save_file).name
     print(f"{model_filename}: test loss {test_loss}, additional digit accuracy {additional_images_accuracy}%")
