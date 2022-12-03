@@ -15,7 +15,7 @@ from torchvision.transforms import functional as transforms_functional
 
 
 # Run modes
-do_training = False
+do_training = True
 evaluate_test_dataset = True
 evaluate_additional = True
 
@@ -28,7 +28,7 @@ learning_rate = 0.003
 momentum = 0.9
 
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
-model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
+model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.dropout02.pt"
 
 
 # Reproducibility
@@ -78,9 +78,11 @@ if do_training:
     model = nn.Sequential(
         nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
         nn.ReLU(),
+        nn.Dropout(p=0.25),
         nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
         nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 6x12x12 -> 16x8x8
         nn.ReLU(),
+        nn.Dropout(p=0.25),
         nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
         nn.Flatten(),                                               # 256
         nn.Linear(256, hidden_sizes[0]),                            # 128
