@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 # import matplotlib.pyplot as plt
 # import torch
@@ -16,13 +16,13 @@ from torchvision.transforms import functional as transforms_functional
 
 # Run modes
 do_training = False
-evaluate_test_dataset = False
+evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
 hidden_sizes = [128, 64]
 output_size = 10
-epochs = 60
+epochs = 30
 batch_size = 32
 learning_rate = 0.003
 momentum = 0.9
@@ -69,6 +69,10 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, s
 # plt.show()
 
 
+# Setup used for both training and evaluation
+loss_function = nn.NLLLoss()
+
+
 if do_training:
     # Construct neural net
     model = nn.Sequential(
@@ -89,7 +93,6 @@ if do_training:
 
     # Train the model
     print("Training ...")
-    criterion = nn.NLLLoss()
     optimizer = SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     start_time = datetime.now()
     for epoch_num in range(epochs):
@@ -99,7 +102,7 @@ if do_training:
             # print(f"      got {len(images)} images from training loader")
             optimizer.zero_grad()
             output = model(images)
-            loss = criterion(output, labels)
+            loss = loss_function(output, labels)
             loss.backward()
             optimizer.step()
             epoch_total_loss += loss.item()
@@ -109,13 +112,15 @@ if do_training:
             #         plt.imshow(image.permute(1, 2, 0))
             #         plt.title(str(label.item()))
             #         plt.show()
-        print(f"      epoch {epoch_num} training loss {epoch_total_loss / len(training_loader)}")
+        epoch_training_loss = round(epoch_total_loss / len(training_loader), 5)
+        print(f"      epoch {epoch_num} training loss {epoch_training_loss}")
     print(f"Training time: {datetime.now() - start_time}")
     print("")
 
     # Save model
     torch.save(model, model_save_file)
 
+    # turn off training mode for evaluation tasks below
     model.train(mode=False)
 else:
     # Load previously saved model
@@ -123,27 +128,25 @@ else:
 
 
 # Check loss and accuracy on test portion of dataset
+test_loss: Optional[float] = None
 if evaluate_test_dataset:
     print("Testing against test portion of dataset ...")
-    correct_count, all_count = 0, 0
+    total_loss, count_loss = 0., 0
     for images, labels in test_loader:
-        for i in range(len(labels)):
-            image = images[i]
-            input_ = torch.unsqueeze(image, 0)
-            with torch.no_grad():
-                output = model(input_)
-            probs = torch.exp(output)
-            predicted_digit = probs.argmax().item()
-            labelled_digit = labels[i].item()
-            if(predicted_digit == labelled_digit):
-                correct_count += 1
-            all_count += 1
+        with torch.no_grad():
+            output = model(images)
+            loss = loss_function(output, labels)
+        total_loss += loss.item()
+        count_loss += 1
 
-            # plt.imshow(image.permute(1, 2, 0))
-            # plt.title(str(labelled_digit))
-            # plt.show()
+        # image = images[0]
+        # plt.imshow(image.permute(1, 2, 0))
+        # plt.title(str(labelled_digit))
+        # plt.show()
+
         # break  # temp!
-    print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
+    test_loss = round(total_loss / count_loss, 5)
+    print(f"   loss in {count_loss} test data batches was {test_loss}")
 
 
 # Try to recognize additional images from outside the dataset
@@ -151,10 +154,11 @@ if evaluate_test_dataset:
 # paper, and come in with grayscale integer values from 0 to 255. The training
 # dataset had background color exactly-1.0 and foreground color up to 1.0, so we need to
 # flip the values and scale to -1.0, 1.0 range.
+additional_images_accuracy: Optional[float] = None
 if evaluate_additional:
     print("Testing additional images ...")
-    correct_count, all_count = 0, 0
-    lowest_prob = 1.0
+
+    # Load additional images
     additional_images_folder = Path(__file__).parent / Path("additional")
     additional_images: List[Tuple[int, str, torch.Tensor]] = []
     for path in additional_images_folder.glob("*.png"):
@@ -166,6 +170,16 @@ if evaluate_additional:
         image = 2.0 - (2.0 * image_raw / 255.) - 1.0
         additional_images.append((digit, path.name, image))
 
+    # Calculate loss
+    images = torch.stack([t[2] for t in additional_images], dim=0)
+    labels = torch.tensor([t[0] for t in additional_images])
+    with torch.no_grad():
+        output = model(images)
+        loss = loss_function(output, labels)
+
+    # Calculate % correct digit predictions
+    correct_count, all_count = 0, 0
+    lowest_prob = 1.0
     for digit, filename, image in sorted(additional_images):
         input_ = torch.unsqueeze(image, 0)
         with torch.no_grad():
@@ -178,6 +192,14 @@ if evaluate_additional:
         all_count += 1
         if probs.max().item() < lowest_prob:
             lowest_prob = probs.max().item()
-        print(f"   {filename} actual {digit} -> {predicted_digit} {'pass' if did_pass else 'FAIL'}")
-        print(f"      probs: {probs.squeeze().tolist()}")
-    print(f"Tested {all_count} additional images, model accuracy {correct_count / all_count}, lowest prob {lowest_prob}.")
+        if not did_pass:
+            print(f"   {filename} actual {digit} -> {predicted_digit} {'pass' if did_pass else 'FAIL'}")
+            print(f"      probs: {[round(p, 4) for p in probs.squeeze().tolist()]}")
+    additional_images_accuracy = round(100 * correct_count / all_count, 1)
+    print(f"   Tested {all_count} additional images: loss {round(loss.item(), 5)}, model accuracy {additional_images_accuracy}%, lowest prob {round(lowest_prob, 4)}")
+
+
+# Summary for git commit messages
+if test_loss is not None and additional_images_accuracy is not None:
+    model_filename = Path(model_save_file).name
+    print(f"{model_filename}: test loss {test_loss}, additional digit accuracy {additional_images_accuracy}%")
