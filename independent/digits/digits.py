@@ -14,8 +14,12 @@ from torchvision.transforms import functional as transforms_functional
 # https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
 
 
+# Run modes
+do_training = False
+evaluate_test_dataset = False
+evaluate_additional = True
+
 # Hyperparameters
-do_training = True
 hidden_sizes = [128, 64]
 output_size = 10
 epochs = 60
@@ -119,26 +123,27 @@ else:
 
 
 # Check loss and accuracy on test portion of dataset
-print("Testing against test portion of dataset ...")
-correct_count, all_count = 0, 0
-for images, labels in test_loader:
-    for i in range(len(labels)):
-        image = images[i]
-        input_ = torch.unsqueeze(image, 0)
-        with torch.no_grad():
-            output = model(input_)
-        probs = torch.exp(output)
-        predicted_digit = probs.argmax().item()
-        labelled_digit = labels[i].item()
-        if(predicted_digit == labelled_digit):
-            correct_count += 1
-        all_count += 1
+if evaluate_test_dataset:
+    print("Testing against test portion of dataset ...")
+    correct_count, all_count = 0, 0
+    for images, labels in test_loader:
+        for i in range(len(labels)):
+            image = images[i]
+            input_ = torch.unsqueeze(image, 0)
+            with torch.no_grad():
+                output = model(input_)
+            probs = torch.exp(output)
+            predicted_digit = probs.argmax().item()
+            labelled_digit = labels[i].item()
+            if(predicted_digit == labelled_digit):
+                correct_count += 1
+            all_count += 1
 
-        # plt.imshow(image.permute(1, 2, 0))
-        # plt.title(str(labelled_digit))
-        # plt.show()
-    # break  # temp!
-print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
+            # plt.imshow(image.permute(1, 2, 0))
+            # plt.title(str(labelled_digit))
+            # plt.show()
+        # break  # temp!
+    print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
 
 
 # Try to recognize additional images from outside the dataset
@@ -146,24 +151,33 @@ print(f"Tested {all_count} images, model accuracy {correct_count / all_count}.")
 # paper, and come in with grayscale integer values from 0 to 255. The training
 # dataset had background color exactly-1.0 and foreground color up to 1.0, so we need to
 # flip the values and scale to -1.0, 1.0 range.
-print("Testing additional images ...")
-additional_images_folder = Path(__file__).parent / Path("additional")
-additional_images: List[Tuple[int, str, torch.Tensor]] = []
-for path in additional_images_folder.glob("*.png"):
-    digit = int(path.name[0])
-    image_raw = torchvision_io.read_image(
-        path=str(path.resolve()),
-        mode=torchvision_io.ImageReadMode.GRAY,
-    ).float()
-    image = 2.0 - (2.0 * image_raw / 255.) - 1.0
-    additional_images.append((digit, path.name, image))
+if evaluate_additional:
+    print("Testing additional images ...")
+    correct_count, all_count = 0, 0
+    lowest_prob = 1.0
+    additional_images_folder = Path(__file__).parent / Path("additional")
+    additional_images: List[Tuple[int, str, torch.Tensor]] = []
+    for path in additional_images_folder.glob("*.png"):
+        digit = int(path.name[0])
+        image_raw = torchvision_io.read_image(
+            path=str(path.resolve()),
+            mode=torchvision_io.ImageReadMode.GRAY,
+        ).float()
+        image = 2.0 - (2.0 * image_raw / 255.) - 1.0
+        additional_images.append((digit, path.name, image))
 
-for digit, filename, image in sorted(additional_images):
-    input_ = torch.unsqueeze(image, 0)
-    with torch.no_grad():
-        output = model(input_)
-    probs = torch.exp(output)
-    predicted_digit = probs.argmax().item()
-    did_pass = digit == predicted_digit
-    print(f"   {filename} actual {digit} -> {predicted_digit} {'pass' if did_pass else 'FAIL'}")
-    print(f"      probs: {probs.squeeze().tolist()}")
+    for digit, filename, image in sorted(additional_images):
+        input_ = torch.unsqueeze(image, 0)
+        with torch.no_grad():
+            output = model(input_)
+        probs = torch.exp(output)
+        predicted_digit = probs.argmax().item()
+        did_pass = digit == predicted_digit
+        if did_pass:
+            correct_count += 1
+        all_count += 1
+        if probs.max().item() < lowest_prob:
+            lowest_prob = probs.max().item()
+        print(f"   {filename} actual {digit} -> {predicted_digit} {'pass' if did_pass else 'FAIL'}")
+        print(f"      probs: {probs.squeeze().tolist()}")
+    print(f"Tested {all_count} additional images, model accuracy {correct_count / all_count}, lowest prob {lowest_prob}.")
