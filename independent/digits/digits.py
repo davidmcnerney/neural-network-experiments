@@ -15,12 +15,12 @@ from torchvision.transforms import functional as transforms_functional
 
 
 # Run modes
-do_training = True
-evaluate_test_dataset = True
+do_training = False
+evaluate_test_dataset = False
 evaluate_additional = True
 
 # Hyperparameters
-hidden_sizes = [128, 64]
+dropout = 0.25
 output_size = 10
 epochs = 30
 batch_size = 32
@@ -28,11 +28,11 @@ learning_rate = 0.003
 momentum = 0.9
 
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
-model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.dropout02.pt"
+model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
 
 
 # Reproducibility
-torch.manual_seed(2147483647)
+torch.manual_seed(2147483647+1)
 
 
 # Load training and test data
@@ -78,18 +78,18 @@ if do_training:
     model = nn.Sequential(
         nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
         nn.ReLU(),
-        nn.Dropout(p=0.25),
+        nn.Dropout(p=dropout),
         nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
         nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 6x12x12 -> 16x8x8
         nn.ReLU(),
-        nn.Dropout(p=0.25),
+        nn.Dropout(p=dropout),
         nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
         nn.Flatten(),                                               # 256
-        nn.Linear(256, hidden_sizes[0]),                            # 128
+        nn.Linear(256, 128),                                        # 128
         nn.ReLU(),
-        nn.Linear(hidden_sizes[0], hidden_sizes[1]),                # 64
+        nn.Linear(128, 64),                                         # 64
         nn.ReLU(),
-        nn.Linear(hidden_sizes[1], output_size),                    # 10
+        nn.Linear(64, output_size),                                 # 10
         nn.LogSoftmax(dim=1)
     )
 
@@ -169,7 +169,9 @@ if evaluate_additional:
             path=str(path.resolve()),
             mode=torchvision_io.ImageReadMode.GRAY,
         ).float()
-        image = 2.0 - (2.0 * image_raw / 255.) - 1.0
+        # TODO: additional preprocessing here, maybe use transforms.Normalize((0.5,), (0.5,)), instead of blw
+        image = 1.0 - (2.0 * image_raw / 255.)
+        image = transforms_functional.normalize(image, [0.5], [0.5])
         additional_images.append((digit, path.name, image))
 
     # Calculate loss
