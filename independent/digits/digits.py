@@ -15,8 +15,8 @@ from torchvision.transforms import functional as transforms_functional
 
 
 # Run modes
-do_training = False
-evaluate_test_dataset = False
+do_training = True
+evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
@@ -27,12 +27,14 @@ batch_size = 32
 learning_rate = 0.003
 momentum = 0.9
 
+random_seed = 2147483647+3
+
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
 model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
 
 
 # Reproducibility
-torch.manual_seed(2147483647+1)
+torch.manual_seed(random_seed)
 
 
 # Load training and test data
