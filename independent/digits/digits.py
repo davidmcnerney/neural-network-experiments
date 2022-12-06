@@ -15,8 +15,8 @@ from torchvision.transforms import functional as transforms_functional
 
 
 # Run modes
-do_training = True
-evaluate_test_dataset = True
+do_training = False
+evaluate_test_dataset = False
 evaluate_additional = True
 
 # Hyperparameters
@@ -111,11 +111,18 @@ if do_training:
             optimizer.step()
             epoch_total_loss += loss.item()
 
+            # histogram_data = images[0].flatten().tolist()
+            # plt.hist(histogram_data, density=True, bins=30)
+            # plt.title("Training image values")
+            # plt.show()
+            # print("Showed histogram")
+
             # for image, label in zip(images, labels):
             #     if label == 9:
             #         plt.imshow(image.permute(1, 2, 0))
             #         plt.title(str(label.item()))
             #         plt.show()
+
         epoch_training_loss = round(epoch_total_loss / len(training_loader), 5)
         print(f"      epoch {epoch_num} training loss {epoch_training_loss}")
     print(f"Training time: {datetime.now() - start_time}")
@@ -172,9 +179,15 @@ if evaluate_additional:
             mode=torchvision_io.ImageReadMode.GRAY,
         ).float()
         # TODO: additional preprocessing here, maybe use transforms.Normalize((0.5,), (0.5,)), instead of blw
-        image = 1.0 - (2.0 * image_raw / 255.)
+        image = 1.0 - image_raw / 255.
         image = transforms_functional.normalize(image, [0.5], [0.5])
         additional_images.append((digit, path.name, image))
+
+        # histogram_data = image.flatten().tolist()
+        # plt.hist(histogram_data, density=True, bins=30)
+        # plt.title("Additional image values")
+        # plt.show()
+        # print("Showed histogram")
 
     # Calculate loss
     images = torch.stack([t[2] for t in additional_images], dim=0)
