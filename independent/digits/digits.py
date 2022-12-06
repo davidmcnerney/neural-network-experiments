@@ -20,7 +20,7 @@ evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
-dropout = 0.25
+dropout = 0.5
 output_size = 10
 epochs = 30
 batch_size = 32
