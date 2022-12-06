@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -13,6 +14,11 @@ from torchvision.transforms import functional as transforms_functional
 
 # https://towardsdatascience.com/handwritten-digit-mnist-pytorch-977b5338e627
 
+argument_parser = argparse.ArgumentParser("Digits")
+argument_parser.add_argument("--random-seed-offset", type=int, default=0, required=True)
+args = argument_parser.parse_args()
+random_seed_offset = args.random_seed_offset
+
 
 # Run modes
 do_training = True
@@ -22,12 +28,12 @@ evaluate_additional = True
 # Hyperparameters
 dropout = 0.5
 output_size = 10
-epochs = 30
+epochs = 20
 batch_size = 32
 learning_rate = 0.003
 momentum = 0.9
 
-random_seed = 2147483647+0
+random_seed = 2147483647 + random_seed_offset
 
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
 model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
@@ -97,7 +103,7 @@ if do_training:
 
     # Train the model
     print("Training ...")
-    print(f"   Random seed: {random_seed}")
+    print(f"   Random seed: {random_seed} (offset {random_seed_offset})")
     optimizer = SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     start_time = datetime.now()
     for epoch_num in range(epochs):
@@ -235,3 +241,5 @@ if evaluate_additional:
 if test_loss is not None and additional_images_accuracy is not None:
     model_filename = Path(model_save_file).name
     print(f"{model_filename}: test loss {test_loss}, additional digit accuracy {additional_images_accuracy}%")
+
+print("")
