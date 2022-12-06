@@ -88,16 +88,16 @@ if do_training:
         nn.ReLU(),
         nn.Dropout(p=dropout),
         nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
-        nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 6x12x12 -> 16x8x8
+        nn.Conv2d(in_channels=6, out_channels=8, kernel_size=5),    # 6x12x12 -> 16x8x8
         nn.ReLU(),
         nn.Dropout(p=dropout),
-        nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
-        nn.Flatten(),                                               # 256
-        nn.Linear(256, 128),                                        # 128
+        nn.MaxPool2d(kernel_size=2),                                # 8x8x8 -> 8x4x4
+        nn.Flatten(),                                               # 128
+        nn.Linear(128, 64),                                         # 128
         nn.ReLU(),
-        nn.Linear(128, 64),                                         # 64
+        nn.Linear(64, 32),                                          # 64
         nn.ReLU(),
-        nn.Linear(64, output_size),                                 # 10
+        nn.Linear(32, output_size),                                 # 10
         nn.LogSoftmax(dim=1)
     )
 
