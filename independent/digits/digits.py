@@ -15,8 +15,8 @@ from torchvision.transforms import functional as transforms_functional
 
 
 # Run modes
-do_training = False
-evaluate_test_dataset = False
+do_training = True
+evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
@@ -27,7 +27,7 @@ batch_size = 32
 learning_rate = 0.003
 momentum = 0.9
 
-random_seed = 2147483647+3
+random_seed = 2147483647+0
 
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
 model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
@@ -97,6 +97,7 @@ if do_training:
 
     # Train the model
     print("Training ...")
+    print(f"   Random seed: {random_seed}")
     optimizer = SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     start_time = datetime.now()
     for epoch_num in range(epochs):
@@ -173,21 +174,33 @@ if evaluate_additional:
     additional_images_folder = Path(__file__).parent / Path("additional")
     additional_images: List[Tuple[int, str, torch.Tensor]] = []
     for path in additional_images_folder.glob("*.png"):
+        # Load from .png file
         digit = int(path.name[0])
         image_raw = torchvision_io.read_image(
             path=str(path.resolve()),
             mode=torchvision_io.ImageReadMode.GRAY,
         ).float()
-        # TODO: additional preprocessing here, maybe use transforms.Normalize((0.5,), (0.5,)), instead of blw
+
+        # Reverse the sense of the colors to match our training data, which was
+        # white images on black background
         image = 1.0 - image_raw / 255.
+
+        # Normalize in the same way our dataset loader did
         image = transforms_functional.normalize(image, [0.5], [0.5])
+
+        # Our training data is super clean, so try to clean it up here to match
+        image[image < 0.] = -1.
+        image[image >= 0.] = 1.
+
         additional_images.append((digit, path.name, image))
 
-        # histogram_data = image.flatten().tolist()
-        # plt.hist(histogram_data, density=True, bins=30)
-        # plt.title("Additional image values")
-        # plt.show()
-        # print("Showed histogram")
+        # if digit == 9:
+        #     import matplotlib.pyplot as plt
+        #     histogram_data = image.flatten().tolist()
+        #     plt.hist(histogram_data, density=True, bins=30)
+        #     plt.title(f"Additional image {digit} values")
+        #     plt.show()
+        #     print("Showed histogram")
 
     # Calculate loss
     images = torch.stack([t[2] for t in additional_images], dim=0)
@@ -209,8 +222,8 @@ if evaluate_additional:
         if did_pass:
             correct_count += 1
         all_count += 1
-        if probs.max().item() < lowest_prob:
-            lowest_prob = probs.max().item()
+        if probs.squeeze()[digit].item() < lowest_prob:
+            lowest_prob = probs.squeeze()[digit].item()
         if not did_pass:
             print(f"   {filename} actual {digit} -> {predicted_digit} {'pass' if did_pass else 'FAIL'}")
             print(f"      probs: {[round(p, 4) for p in probs.squeeze().tolist()]}")
