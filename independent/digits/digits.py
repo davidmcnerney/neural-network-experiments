@@ -26,7 +26,7 @@ evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
-epochs = 15
+epochs = 10
 batch_size = 32
 output_size = 10
 learning_rate = 0.003
