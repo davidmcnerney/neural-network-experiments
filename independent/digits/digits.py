@@ -86,11 +86,13 @@ if do_training:
     model = nn.Sequential(
         nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
         nn.ReLU(),
-        nn.Dropout(p=dropout),
+        # nn.Dropout(p=dropout),
+        nn.BatchNorm2d(num_features=6),
         nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
-        nn.Conv2d(in_channels=6, out_channels=8, kernel_size=5),    # 6x12x12 -> 16x8x8
+        nn.Conv2d(in_channels=6, out_channels=8, kernel_size=5),    # 6x12x12 -> 8x8x8
         nn.ReLU(),
-        nn.Dropout(p=dropout),
+        # nn.Dropout(p=dropout),
+        nn.BatchNorm2d(num_features=8),
         nn.MaxPool2d(kernel_size=2),                                # 8x8x8 -> 8x4x4
         nn.Flatten(),                                               # 128
         nn.Linear(128, 64),                                         # 128
