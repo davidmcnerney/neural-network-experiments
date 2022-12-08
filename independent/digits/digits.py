@@ -26,12 +26,13 @@ evaluate_test_dataset = True
 evaluate_additional = True
 
 # Hyperparameters
-epochs = 10
+epochs = 15
 batch_size = 32
 output_size = 10
 learning_rate = 0.003
 momentum = 0.9
 random_seed = 2147483647 + random_seed_offset
+dropout = 0.25
 
 # Storage locations
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
@@ -43,11 +44,13 @@ model = nn.Sequential(
     nn.ReLU(),
     # nn.Dropout(p=dropout),
     nn.BatchNorm2d(num_features=6),
+    nn.Dropout2d(p=dropout),
     nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
     nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 16x12x12 -> 16x8x8
     nn.ReLU(),
     # nn.Dropout(p=dropout),
     nn.BatchNorm2d(num_features=16),
+    nn.Dropout2d(p=dropout),
     nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
     nn.Flatten(),                                               # 256
     nn.Linear(256, 128),                                        # 256
