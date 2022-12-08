@@ -31,11 +31,32 @@ batch_size = 32
 output_size = 10
 learning_rate = 0.003
 momentum = 0.9
-
 random_seed = 2147483647 + random_seed_offset
 
+# Storage locations
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
 model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
+
+# Neural net model
+model = nn.Sequential(
+    nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
+    nn.ReLU(),
+    # nn.Dropout(p=dropout),
+    nn.BatchNorm2d(num_features=6),
+    nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
+    nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 16x12x12 -> 16x8x8
+    nn.ReLU(),
+    # nn.Dropout(p=dropout),
+    nn.BatchNorm2d(num_features=16),
+    nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
+    nn.Flatten(),                                               # 256
+    nn.Linear(256, 128),                                        # 256
+    nn.ReLU(),
+    nn.Linear(128, 64),                                         # 64
+    nn.ReLU(),
+    nn.Linear(64, output_size),                                 # 10
+    nn.LogSoftmax(dim=1)
+)
 
 
 # Reproducibility
@@ -81,27 +102,6 @@ loss_function = nn.NLLLoss()
 
 
 if do_training:
-    # Construct neural net
-    model = nn.Sequential(
-        nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
-        nn.ReLU(),
-        # nn.Dropout(p=dropout),
-        nn.BatchNorm2d(num_features=6),
-        nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
-        nn.Conv2d(in_channels=6, out_channels=8, kernel_size=5),    # 6x12x12 -> 8x8x8
-        nn.ReLU(),
-        # nn.Dropout(p=dropout),
-        nn.BatchNorm2d(num_features=8),
-        nn.MaxPool2d(kernel_size=2),                                # 8x8x8 -> 8x4x4
-        nn.Flatten(),                                               # 128
-        nn.Linear(128, 64),                                         # 128
-        nn.ReLU(),
-        nn.Linear(64, 32),                                          # 64
-        nn.ReLU(),
-        nn.Linear(32, output_size),                                 # 10
-        nn.LogSoftmax(dim=1)
-    )
-
     # Train the model
     print("Training ...")
     print(f"   Random seed: {random_seed} (offset {random_seed_offset})")
