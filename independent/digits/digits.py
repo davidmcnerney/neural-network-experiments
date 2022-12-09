@@ -21,8 +21,8 @@ random_seed_offset = args.random_seed_offset
 
 
 # Run modes
-do_training = True
-evaluate_test_dataset = True
+do_training = False
+evaluate_test_dataset = False
 evaluate_additional = True
 
 # Hyperparameters
@@ -36,30 +36,38 @@ dropout = 0.25
 
 # Storage locations
 dataset_save_folder = "/Users/dave/Temp/neural_net_training/datasets"
-model_save_file = "/Users/dave/Temp/neural_net_training/models/digits_emnist.pt"
+model_save_file = f"/Users/dave/Temp/neural_net_training/models/digits_emnist_{random_seed}.pt"
+
+# Summarize settings
+print(f"Random seed: {random_seed} (offset {random_seed_offset})")
 
 # Neural net model
-model = nn.Sequential(
-    nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
-    nn.ReLU(),
-    # nn.Dropout(p=dropout),
-    nn.BatchNorm2d(num_features=6),
-    nn.Dropout2d(p=dropout),
-    nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
-    nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 16x12x12 -> 16x8x8
-    nn.ReLU(),
-    # nn.Dropout(p=dropout),
-    nn.BatchNorm2d(num_features=16),
-    nn.Dropout2d(p=dropout),
-    nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
-    nn.Flatten(),                                               # 256
-    nn.Linear(256, 128),                                        # 256
-    nn.ReLU(),
-    nn.Linear(128, 64),                                         # 64
-    nn.ReLU(),
-    nn.Linear(64, output_size),                                 # 10
-    nn.LogSoftmax(dim=1)
-)
+if do_training:
+    model = nn.Sequential(
+        nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5),    # 1x28x28 -> 6x24x24
+        nn.ReLU(),
+        # nn.Dropout(p=dropout),
+        nn.BatchNorm2d(num_features=6),
+        nn.Dropout2d(p=dropout),
+        nn.MaxPool2d(kernel_size=2),                                # 6x24x24 -> 6x12x12
+        nn.Conv2d(in_channels=6, out_channels=16, kernel_size=5),   # 16x12x12 -> 16x8x8
+        nn.ReLU(),
+        # nn.Dropout(p=dropout),
+        nn.BatchNorm2d(num_features=16),
+        nn.Dropout2d(p=dropout),
+        nn.MaxPool2d(kernel_size=2),                                # 16x8x8 -> 16x4x4
+        nn.Flatten(),                                               # 256
+        nn.Linear(256, 128),                                        # 256
+        nn.ReLU(),
+        nn.Linear(128, 64),                                         # 64
+        nn.ReLU(),
+        nn.Linear(64, output_size),                                 # 10
+        nn.LogSoftmax(dim=1)
+    )
+else:
+    # Load previously saved model
+    model = torch.load(model_save_file)
+    model.train(mode=False)
 
 
 # Reproducibility
@@ -107,7 +115,6 @@ loss_function = nn.NLLLoss()
 if do_training:
     # Train the model
     print("Training ...")
-    print(f"   Random seed: {random_seed} (offset {random_seed_offset})")
     optimizer = SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     start_time = datetime.now()
     for epoch_num in range(epochs):
@@ -139,14 +146,11 @@ if do_training:
     print(f"Training time: {datetime.now() - start_time}")
     print("")
 
-    # Save model
-    torch.save(model, model_save_file)
-
     # turn off training mode for evaluation tasks below
     model.train(mode=False)
-else:
-    # Load previously saved model
-    model = torch.load(model_save_file)
+
+    # Save model
+    torch.save(model, model_save_file)
 
 
 # Check loss and accuracy on test portion of dataset
