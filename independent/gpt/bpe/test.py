@@ -1,7 +1,7 @@
 from textwrap import dedent
 
-from independent.gpt.bpe.builder import build_vocab
-from independent.gpt.bpe.text_processing import pretokenize
+from independent.gpt.bpe import builder
+from independent.gpt.bpe import text_processing
 
 
 def test_pretokenize():
@@ -15,7 +15,13 @@ def test_pretokenize():
         "."
     ]
 
-    assert pretokenize(string) == expected_words
+    assert text_processing.pretokenize(string) == expected_words
+
+
+def test_to_unicode_bytes():
+    string = "Big jug, dig dug."
+    expected = "BigĠjug,ĠdigĠdug."
+    assert text_processing.to_unicode_bytes(string) == expected
 
 
 def test_build_vocab():
@@ -33,4 +39,4 @@ def test_build_vocab():
         # etc
     ]
 
-    assert build_vocab(training_text) == (expected_vocab, expected_merges)
+    assert builder.build_vocab(training_text) == (expected_vocab, expected_merges)
