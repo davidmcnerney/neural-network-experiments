@@ -10,6 +10,7 @@ torchaudio = "*"
 matplotlib = "*"
 notebook = "*"
 pytest = "*"
+regex = "*"
 
 [dev-packages]
 
