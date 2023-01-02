@@ -1,4 +1,5 @@
 from textwrap import dedent
+from typing import Dict
 
 from independent.gpt.bpe import builder
 from independent.gpt.bpe import text_processing
@@ -30,13 +31,23 @@ def test_build_vocab():
     """)
 
     expected_vocab = {
-        0: "B",
+        0: "Bi",
+        1: "ig",
         # etc
-    }
+    }.update(_byte_vocab())
 
     expected_merges = [
         (("B", "i"), "Bi")
         # etc
     ]
 
-    assert builder.build_vocab(training_text) == (expected_vocab, expected_merges)
+    actual_vocab, actual_merges = builder.build_vocabulary_and_merge_list(
+        training_text=training_text,
+        count_merges=5,
+    )
+    assert actual_vocab == expected_vocab
+    assert actual_merges == expected_merges
+
+
+def _byte_vocab() -> Dict[int, str]:
+    return dict(text_processing.BYTE_TO_UNICODE_REPRESENTATION)

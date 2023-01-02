@@ -40,12 +40,23 @@ def pretokenize(string: str) -> List[str]:
 #
 
 
+def to_unicode_bytes(string: str) -> str:
+    """
+    Converts a Unicode string into a another Unicode string that represents its bytes.
+    Simple characters like ! or A will look the same. Characters that aren't so readable
+    like spaces will change to other characters that are easier to read. Unicode characters
+    will change to other characters that represent their bytes. See unit tests for example.
+    """
+    string_in_bytes = string.encode("utf-8")
+    return "".join([BYTE_TO_UNICODE_REPRESENTATION[byte] for byte in string_in_bytes])
+
+
 def _create_byte_to_unicode_representation() -> Dict[int, str]:
     # These are bytes that are readily readable when rendered as characters,
     # such as 65 -> "A".
     readable_bytes = list(range(ord("!"), ord("~") + 1)) \
-        + list(range(ord("¡"), ord("¬") + 1)) \
-        + list(range(ord("®"), ord("ÿ") + 1))
+                     + list(range(ord("¡"), ord("¬") + 1)) \
+                     + list(range(ord("®"), ord("ÿ") + 1))
 
     # Starting at 256, we have a series of other characters that display well.
     # We use those to represent the bytes from 0-255 which are not readily
@@ -64,14 +75,3 @@ def _create_byte_to_unicode_representation() -> Dict[int, str]:
 
 
 BYTE_TO_UNICODE_REPRESENTATION = _create_byte_to_unicode_representation()
-
-
-def to_unicode_bytes(string: str) -> str:
-    """
-    Converts a Unicode string into a another Unicode string that represents its bytes.
-    Simple characters like ! or A will look the same. Characters that aren't so readable
-    like spaces will change to other characters that are easier to read. Unicode characters
-    will change to other characters that represent their bytes. See unit tests for example.
-    """
-    string_in_bytes = string.encode("utf-8")
-    return "".join([BYTE_TO_UNICODE_REPRESENTATION[byte] for byte in string_in_bytes])
