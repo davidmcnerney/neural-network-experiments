@@ -20,10 +20,18 @@ def tokenize(
     ]
 
 
+def detokenize(
+        token_indices: List[int],
+        vocabulary: type_definitions.VocabularyByIndex,
+) -> str:
+    unicode_byte_representation = "".join([vocabulary[token_index] for token_index in token_indices])
+    return text_processing.to_text(unicode_byte_representation)
+
+
 def coarse_tokenize(text: str) -> List[str]:
     # TODO: cache
     return [
-        text_processing.to_unicode_bytes(token)
+        text_processing.to_unicode_byte_representation(string=token)
         for token in text_processing.pretokenize(text)
     ]
 

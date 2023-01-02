@@ -2,6 +2,7 @@ from collections import defaultdict
 import json
 from typing import Dict, List, Tuple
 
+from independent.gpt.bpe import helpers
 from independent.gpt.bpe import text_processing
 from independent.gpt.bpe import tokenizer
 from independent.gpt.bpe import type_definitions
@@ -103,10 +104,7 @@ def _output_progress_dot() -> None:
 
 
 def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByToken:
-    return {
-        value: key
-        for key, value in vocabulary_by_index.items()
-    }
+    return helpers.invert_dictionary(vocabulary_by_index)
 
 
 def remove_base_byte_vocab(vocab: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByIndex:

@@ -2,6 +2,8 @@ from typing import Dict, List
 
 import regex
 
+from independent.gpt.bpe import helpers
+
 
 #
 # Pretokenization
@@ -36,11 +38,11 @@ def pretokenize(string: str) -> List[str]:
 
 
 #
-# Bytes to Unicode
+# Unicode byte representation
 #
 
 
-def to_unicode_bytes(string: str) -> str:
+def to_unicode_byte_representation(string: str) -> str:
     """
     Converts a Unicode string into a another Unicode string that represents its bytes.
     Simple characters like ! or A will look the same. Characters that aren't so readable
@@ -49,6 +51,14 @@ def to_unicode_bytes(string: str) -> str:
     """
     string_in_bytes = string.encode("utf-8")
     return "".join([BYTE_TO_UNICODE_REPRESENTATION[byte] for byte in string_in_bytes])
+
+
+def to_text(unicode_byte_representation: str) -> str:
+    """
+    Inverts the above to_unicode_byte_representation
+    """
+    byte_list = [UNICODE_REPRESENTATION_TO_BYTE[char] for char in unicode_byte_representation]
+    return bytes(byte_list).decode("utf-8")
 
 
 def _create_byte_to_unicode_representation() -> Dict[int, str]:
@@ -75,3 +85,4 @@ def _create_byte_to_unicode_representation() -> Dict[int, str]:
 
 
 BYTE_TO_UNICODE_REPRESENTATION = _create_byte_to_unicode_representation()
+UNICODE_REPRESENTATION_TO_BYTE = helpers.invert_dictionary(BYTE_TO_UNICODE_REPRESENTATION)

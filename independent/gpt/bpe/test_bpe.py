@@ -20,10 +20,10 @@ def test_pretokenize():
     assert text_processing.pretokenize(string) == expected_words
 
 
-def test_to_unicode_bytes():
+def test_to_unicode_byte_representation():
     string = "Big jug, dig dug."
     expected = "BigĠjug,ĠdigĠdug."
-    assert text_processing.to_unicode_bytes(string) == expected
+    assert text_processing.to_unicode_byte_representation(string=string) == expected
 
 
 def test_build_vocab():
@@ -97,6 +97,32 @@ def test_tokenize():
         259,
         46,
     ]
+    assert tokens == expected_tokens
+
+
+def test_detokenize():
+    tokens = [
+        263,
+        262,
+        44,
+        260,
+        259,
+        46,
+    ]
+    vocab_index_to_token = {
+        256: "Ġd",
+        257: "ug",
+        258: "ig",
+        259: "Ġdug",
+        260: "Ġdig",
+        261: "jug",
+        262: "Ġjug",
+        263: "Big",
+    }
+    vocab_index_to_token.update(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
+    text = tokenizer.detokenize(tokens,vocab_index_to_token)
+    expected_text = """Big jug, dig dug."""
+    assert text == expected_text
 
 
 def _byte_vocab() -> Dict[int, str]:
