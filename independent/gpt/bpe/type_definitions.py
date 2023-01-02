@@ -1,5 +1,6 @@
 from typing import Dict, Tuple
 
 
-Vocabulary = Dict[int, str]
-MergeList = Dict[Tuple[str, str], str]
+VocabularyByIndex = Dict[int, str]          # token index integer -> token's Unicode byte representation
+VocabularyByToken = Dict[str, int]          # token's Unicode byte representation -> token index integer
+MergeList = Dict[Tuple[str, str], str]      # two token Unicode byte representations -> their merged token

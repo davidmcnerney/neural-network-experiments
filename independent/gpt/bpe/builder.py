@@ -14,7 +14,7 @@ from independent.gpt.bpe import type_definitions
 def build_vocabulary_and_merge_list(
         training_text: str,
         count_merges: int,
-) -> Tuple[type_definitions.Vocabulary, type_definitions.MergeList]:
+) -> Tuple[type_definitions.VocabularyByIndex, type_definitions.MergeList]:
     """
     Builds:
         - a vocabulary: a dictionary mapping token index integers to token strings
@@ -22,7 +22,7 @@ def build_vocabulary_and_merge_list(
             another token in our vocabulary
     """
 
-    vocabulary: type_definitions.Vocabulary = {}
+    vocabulary: type_definitions.VocabularyByIndex = {}
     merge_list: type_definitions.MergeList = {}
     next_available_index = 0
 
@@ -102,14 +102,21 @@ def _output_progress_dot() -> None:
 #
 
 
-def remove_base_byte_vocab(vocab: type_definitions.Vocabulary) -> type_definitions.Vocabulary:
+def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByToken:
+    return {
+        value: key
+        for key, value in vocabulary_by_index.items()
+    }
+
+
+def remove_base_byte_vocab(vocab: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByIndex:
     copy = dict(vocab)
     for index in range(256):
         del copy[index]
     return copy
 
 
-def summarize_vocab(vocab: type_definitions.Vocabulary) -> None:
+def summarize_vocab(vocab: type_definitions.VocabularyByIndex) -> None:
     for index, string in vocab.items():
         print(f"{index:6}: {string}")
 
@@ -120,7 +127,7 @@ def summarize_merges(merges: type_definitions.MergeList) -> None:
         print(f"{first} + {second} -> {merged}")
 
 
-def serialize_vocab(vocab: type_definitions.Vocabulary) -> str:
+def serialize_vocab(vocab: type_definitions.VocabularyByIndex) -> str:
     return json.dumps(vocab, indent=3)
 
 

@@ -4,6 +4,22 @@ from independent.gpt.bpe import text_processing
 from independent.gpt.bpe import type_definitions
 
 
+def tokenize(
+        text: str,
+        vocabulary: type_definitions.VocabularyByToken,
+        merge_list: type_definitions.MergeList,
+) -> List[int]:
+    tokens = [
+        fine_token
+        for coarse_token in coarse_tokenize(text)
+        for fine_token in fine_tokenize(coarse_token, merge_list)
+    ]
+    return [
+        vocabulary[token]
+        for token in tokens
+    ]
+
+
 def coarse_tokenize(text: str) -> List[str]:
     # TODO: cache
     return [

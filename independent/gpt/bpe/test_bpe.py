@@ -3,6 +3,7 @@ from typing import Dict, List
 
 from independent.gpt.bpe import builder
 from independent.gpt.bpe import text_processing
+from independent.gpt.bpe import tokenizer
 
 
 def test_pretokenize():
@@ -61,6 +62,41 @@ def test_build_vocab():
         B ig
     """)
     assert "\n" + builder.serialize_merges(merges) == expected_merges
+
+
+def test_tokenize():
+    text = """Big jug, dig dug."""
+    vocab_index_to_token = {
+        256: "Ġd",
+        257: "ug",
+        258: "ig",
+        259: "Ġdug",
+        260: "Ġdig",
+        261: "jug",
+        262: "Ġjug",
+        263: "Big",
+    }
+    vocab_index_to_token.update(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
+    vocab_token_to_index = builder.invert_vocabulary(vocab_index_to_token)
+    merge_list = {
+        ("Ġ", "d"): "Ġd",
+        ("u", "g"): "ug",
+        ("i", "g"): "ig",
+        ("Ġd", "ug"): "Ġdug",
+        ("Ġd", "ig"): "Ġdig",
+        ("j", "ug"): "jug",
+        ("Ġ", "jug"): "Ġjug",
+        ("B", "ig"): "Big",
+    }
+    tokens = tokenizer.tokenize(text=text, vocabulary=vocab_token_to_index, merge_list=merge_list)
+    expected_tokens = [
+        263,
+        262,
+        44,
+        260,
+        259,
+        46,
+    ]
 
 
 def _byte_vocab() -> Dict[int, str]:
