@@ -5,13 +5,13 @@ from independent.gpt.bpe import text_processing
 
 
 Vocabulary = Dict[int, str]
-Merge = Tuple[str, str, str]   # first, second, merged (we don't really need `merged`)
+MergeList = Dict[Tuple[str, str], str]
 
 
 def build_vocabulary_and_merge_list(
         training_text: str,
         count_merges: int,
-) -> Tuple[Vocabulary, List[Merge]]:
+) -> Tuple[Vocabulary, MergeList]:
     """
     Builds:
         - a vocabulary: a dictionary mapping token index integers to token strings
@@ -20,7 +20,7 @@ def build_vocabulary_and_merge_list(
     """
 
     vocabulary: Vocabulary = {}
-    merge_list: List[Merge] = []
+    merge_list: MergeList = {}
     next_available_index = 0
 
     # Establish initial vocabulary of the 256 individual bytes
@@ -43,7 +43,7 @@ def build_vocabulary_and_merge_list(
         first, second, _ = next_pair_frequency
         merged = first + second
 
-        merge_list.append((first, second, merged))
+        merge_list[first, second] = merged
         vocabulary[next_available_index] = merged
         next_available_index += 1
 
@@ -57,7 +57,7 @@ PairFrequency = Tuple[str, str, int]
 
 def _compute_pair_frequencies(
         text: str,
-        merge_list: List[Merge],
+        merge_list: MergeList,
 ) -> List[PairFrequency]:
     """
     Tokenizes given the merge_list, finds all pairs of adjacent tokens,
@@ -73,38 +73,36 @@ def _compute_pair_frequencies(
 
 
 def _coarse_tokenize(text: str) -> List[str]:
+    # TODO: cache
     return [
         text_processing.to_unicode_bytes(token)
         for token in text_processing.pretokenize(text)
     ]
 
 
-def _fine_tokenize(string: str, merge_list: List[Merge]) -> List[str]:
+def _fine_tokenize(string: str, merge_list: MergeList) -> List[str]:
     # Start by breaking the string into 1 byte tokens
     tokens = list(string)
 
-    # apply all possible merges in the merge list
-    # TODO: this is gonna be slow with the typical length of merge list
-    #       - consider making merge list an ordered dict so that we can check presence fast
-    for merge in merge_list:
-        tokens = _apply_merge(tokens, merge)
+    # Work through the string, checking each pair of tokens in turn for presence in the merge list
+    # TODO: this has to keep going until there is no more merging to be done. Right now, it only does one pass, merging single bytes to pairs only
+    while True:
+        out_tokens: List[str] = []
+        start_index = 0
+        while start_index < len(tokens):
+            if start_index < len(tokens) - 1:
+                first = tokens[start_index]
+                second = tokens[start_index + 1]
+                if (first, second) in merge_list:
+                    out_tokens.append(merge_list[first, second])
+                    start_index += 2
+                    continue
+            out_tokens.append(tokens[start_index])
+            start_index += 1
 
-    return tokens
-
-
-def _apply_merge(in_tokens: List[str], merge: Merge) -> List[str]:
-    first, second, merged = merge
-
-    out_tokens: List[str] = []
-    startIndex = 0
-    while startIndex < len(in_tokens):
-        if startIndex < len(in_tokens) - 1 and in_tokens[startIndex] == first and in_tokens[startIndex + 1] == second:
-            out_tokens.append(merged)
-            startIndex += 2
-        else:
-            out_tokens.append(in_tokens[startIndex])
-            startIndex += 1
-    return out_tokens
+        if out_tokens == tokens:
+            return out_tokens
+        tokens = out_tokens  # loop around to continue merging larger and larger tokens
 
 
 def _pairs(
@@ -152,8 +150,9 @@ def summarize_vocab(vocab: Vocabulary) -> None:
         print(f"{index:6}: {string}")
 
 
-def summarize_merges(merges: List[Merge]) -> None:
-    for first, second, merged in merges:
+def summarize_merges(merges: MergeList) -> None:
+    for t, merged in merges.items():
+        first, second = t
         print(f"{first} + {second} -> {merged}")
 
 
