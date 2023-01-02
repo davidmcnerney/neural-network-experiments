@@ -31,6 +31,8 @@ def build_vocabulary_and_merge_list(
     # or there is nothing left to merge
     merges_remaining = count_merges
     while merges_remaining > 0:
+        _output_progress_dot()
+
         pair_frequencies = _compute_pair_frequencies(training_text, merge_list)
 
         # Should not normally happen
@@ -136,3 +138,24 @@ def _insert_pair_frequency(
         pair_frequencies.insert(index_to_insert_at, new_pair_frequency)
     else:
         pair_frequencies.append(new_pair_frequency)
+
+
+def remove_base_byte_vocab(vocab: Vocabulary) -> Vocabulary:
+    copy = dict(vocab)
+    for index in range(256):
+        del copy[index]
+    return copy
+
+
+def summarize_vocab(vocab: Vocabulary) -> None:
+    for index, string in vocab.items():
+        print(f"{index:6}: {string}")
+
+
+def summarize_merges(merges: List[Merge]) -> None:
+    for first, second, merged in merges:
+        print(f"{first} + {second} -> {merged}")
+
+
+def _output_progress_dot() -> None:
+    print(".", end="", flush=True)

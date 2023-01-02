@@ -34,27 +34,10 @@ def test_build_vocab():
     )
 
     print("\n\n")
-    _summarize_vocab(_base_bytes_removed(actual_vocab))
-    _summarize_merges(actual_merges)
+    builder.summarize_vocab(builder.remove_base_byte_vocab(actual_vocab))
+    builder.summarize_merges(actual_merges)
     assert False
 
 
 def _byte_vocab() -> Dict[int, str]:
     return dict(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
-
-
-def _base_bytes_removed(vocab: builder.Vocabulary) -> builder.Vocabulary:
-    copy = dict(vocab)
-    for index in range(256):
-        del copy[index]
-    return copy
-
-
-def _summarize_vocab(vocab: builder.Vocabulary) -> None:
-    for index, string in vocab.items():
-        print(f"{index:6}: {string}")
-
-
-def _summarize_merges(merges: List[builder.Merge]) -> None:
-    for first, second, merged in merges:
-        print(f"{first} + {second} -> {merged}")
