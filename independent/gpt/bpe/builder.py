@@ -1,4 +1,5 @@
 from collections import defaultdict
+import json
 from typing import Dict, List, Optional, Tuple
 
 from independent.gpt.bpe import text_processing
@@ -158,3 +159,15 @@ def summarize_merges(merges: MergeList) -> None:
 
 def _output_progress_dot() -> None:
     print(".", end="", flush=True)
+
+
+def serialize_vocab(vocab: Vocabulary) -> str:
+    return json.dumps(vocab, indent=3)
+
+
+def serialize_merges(merges: MergeList) -> str:
+    output_string = ""
+    for t, _ in merges.items():
+        first, second = t
+        output_string += f"{first} {second}\n"
+    return output_string

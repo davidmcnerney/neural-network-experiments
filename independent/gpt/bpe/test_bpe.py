@@ -28,15 +28,39 @@ def test_to_unicode_bytes():
 def test_build_vocab():
     training_text = """Big jug, dig dug."""
 
-    actual_vocab, actual_merges = builder.build_vocabulary_and_merge_list(
+    vocab, merges = builder.build_vocabulary_and_merge_list(
         training_text=training_text,
         count_merges=1000,
     )
 
-    print("\n\n")
-    builder.summarize_vocab(builder.remove_base_byte_vocab(actual_vocab))
-    builder.summarize_merges(actual_merges)
-    assert False
+    # print("\n\n")
+    # builder.summarize_vocab(builder.remove_base_byte_vocab(vocab))
+    # builder.summarize_merges(merges)
+    # assert False
+
+    expected_vocab = {
+        256: "Ġd",
+        257: "ug",
+        258: "ig",
+        259: "Ġdug",
+        260: "Ġdig",
+        261: "jug",
+        262: "Ġjug",
+        263: "Big",
+    }
+    assert builder.remove_base_byte_vocab(vocab) == expected_vocab
+
+    expected_merges = dedent("""
+        Ġ d
+        u g
+        i g
+        Ġd ug
+        Ġd ig
+        j ug
+        Ġ jug
+        B ig
+    """)
+    assert "\n" + builder.serialize_merges(merges) == expected_merges
 
 
 def _byte_vocab() -> Dict[int, str]:
