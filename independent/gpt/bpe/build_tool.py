@@ -25,7 +25,7 @@ if __name__ == "__main__":
     # builder.summarize_merges(merges)
 
     with open(args.output_vocab_file, "w") as file:
-        file.write(builder.serialize_vocab(vocab))
+        file.write(builder.serialize_vocabulary(vocab))
     with open(args.output_merge_file, "w") as file:
         file.write(builder.serialize_merges(merges))
     print("\nWrote files.")

@@ -114,7 +114,7 @@ def remove_base_byte_vocab(vocab: type_definitions.VocabularyByIndex) -> type_de
     return copy
 
 
-def summarize_vocab(vocab: type_definitions.VocabularyByIndex) -> None:
+def summarize_vocabulary(vocab: type_definitions.VocabularyByIndex) -> None:
     for index, string in vocab.items():
         print(f"{index:6}: {string}")
 
@@ -125,7 +125,7 @@ def summarize_merges(merges: type_definitions.MergeList) -> None:
         print(f"{first} + {second} -> {merged}")
 
 
-def serialize_vocab(vocab: type_definitions.VocabularyByIndex) -> str:
+def serialize_vocabulary(vocab: type_definitions.VocabularyByIndex) -> str:
     return json.dumps(vocab, indent=3)
 
 
@@ -135,3 +135,28 @@ def serialize_merges(merges: type_definitions.MergeList) -> str:
         first, second = t
         output_string += f"{first} {second}\n"
     return output_string
+
+
+def deserialize_vocabulary(string: str) -> type_definitions.VocabularyByIndex:
+    return json.loads(string)
+
+
+def deserialize_merge_list(string: str) -> type_definitions.MergeList:
+    merge_list: type_definitions.MergeList = {}
+    for line in string.splitlines():
+        first, second = line.split(" ")
+        merged = first + second
+        merge_list[first, second] = merged
+    return merge_list
+
+
+def load_vocabulary_from_file(filename: str) -> type_definitions.VocabularyByIndex:
+    with open(filename) as file:
+        contents = file.read()
+        return deserialize_vocabulary(contents)
+
+
+def load_merge_list_from_file(filename: str) -> type_definitions.MergeList:
+    with open(filename) as file:
+        contents = file.read()
+        return deserialize_merge_list(contents)
