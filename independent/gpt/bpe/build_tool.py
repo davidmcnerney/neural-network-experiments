@@ -4,7 +4,7 @@ from independent.gpt.bpe import builder
 
 
 # Usage:
-#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/build_tool.py --input-file ~/Temp/OpenAI/bpe/tinyshakespeare.txt --count-merges 1000
+#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/build_tool.py --input-file ~/Temp/OpenAI/bpe/tinyshakespeare.txt --count-merges 10000 --output-vocab-file ~/Temp/gpt/bpe/tinyshakespeare.10000.vocab.json --output-merge-file ~/Temp/gpt/bpe/tinyshakespeare.10000.merge.bpe
 
 
 if __name__ == "__main__":
