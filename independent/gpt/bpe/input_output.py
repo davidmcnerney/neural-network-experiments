@@ -30,7 +30,7 @@ def serialize_vocabulary(vocab: type_definitions.VocabularyByIndex) -> str:
     return json.dumps(vocab, indent=3)
 
 
-def serialize_merges(merges: type_definitions.MergeList) -> str:
+def serialize_merge_list(merges: type_definitions.MergeList) -> str:
     output_string = ""
     for t, _ in merges.items():
         first, second = t

@@ -62,7 +62,7 @@ def test_build_vocab():
         Ġ jug
         B ig
     """)
-    assert "\n" + input_output.serialize_merges(merges) == expected_merges
+    assert "\n" + input_output.serialize_merge_list(merges) == expected_merges
 
 
 def test_tokenize():

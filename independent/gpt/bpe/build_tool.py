@@ -28,5 +28,5 @@ if __name__ == "__main__":
     with open(args.output_vocab_file, "w") as file:
         file.write(input_output.serialize_vocabulary(vocab))
     with open(args.output_merge_file, "w") as file:
-        file.write(input_output.serialize_merges(merges))
+        file.write(input_output.serialize_merge_list(merges))
     print("\nWrote files.")
