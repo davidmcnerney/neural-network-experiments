@@ -26,19 +26,17 @@ def test_to_unicode_bytes():
 
 
 def test_build_vocab():
-    training_text = dedent("""
-        Big jug, dig dug.
-    """)
+    training_text = """big"""
 
     expected_vocab = {
-        0: "Bi",
-        1: "ig",
-        # etc
-    }.update(_byte_vocab())
+        256: "ig",
+        257: "big",
+    }
+    expected_vocab.update(_byte_vocab())
 
     expected_merges = [
-        (("B", "i"), "Bi")
-        # etc
+        ("i", "g", "ig"),
+        ("b", "ig", "big"),
     ]
 
     actual_vocab, actual_merges = builder.build_vocabulary_and_merge_list(
