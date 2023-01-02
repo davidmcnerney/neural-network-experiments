@@ -40,8 +40,8 @@ def build_vocabulary_and_merge_list(
         if len(pair_frequencies) == 0:
             break
 
-        next_pair_frequency = pair_frequencies[-1]
-        first, second, _ = next_pair_frequency
+        highest_frequency = pair_frequencies[-1]
+        first, second, _ = highest_frequency
         merged = first + second
 
         merge_list[first, second] = merged
@@ -86,7 +86,6 @@ def _fine_tokenize(string: str, merge_list: MergeList) -> List[str]:
     tokens = list(string)
 
     # Work through the string, checking each pair of tokens in turn for presence in the merge list
-    # TODO: this has to keep going until there is no more merging to be done. Right now, it only does one pass, merging single bytes to pairs only
     while True:
         out_tokens: List[str] = []
         start_index = 0
