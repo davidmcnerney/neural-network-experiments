@@ -1,5 +1,5 @@
 from textwrap import dedent
-from typing import Dict
+from typing import Dict, List
 
 from independent.gpt.bpe import builder
 from independent.gpt.bpe import text_processing
@@ -26,26 +26,35 @@ def test_to_unicode_bytes():
 
 
 def test_build_vocab():
-    training_text = """big"""
-
-    expected_vocab = {
-        256: "ig",
-        257: "big",
-    }
-    expected_vocab.update(_byte_vocab())
-
-    expected_merges = [
-        ("i", "g", "ig"),
-        ("b", "ig", "big"),
-    ]
+    training_text = """Big jug, dig dug."""
 
     actual_vocab, actual_merges = builder.build_vocabulary_and_merge_list(
         training_text=training_text,
-        count_merges=5,
+        count_merges=1000,
     )
-    assert actual_vocab == expected_vocab
-    assert actual_merges == expected_merges
+
+    print("\n\n")
+    _summarize_vocab(_base_bytes_removed(actual_vocab))
+    _summarize_merges(actual_merges)
+    assert False
 
 
 def _byte_vocab() -> Dict[int, str]:
     return dict(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
+
+
+def _base_bytes_removed(vocab: builder.Vocabulary) -> builder.Vocabulary:
+    copy = dict(vocab)
+    for index in range(256):
+        del copy[index]
+    return copy
+
+
+def _summarize_vocab(vocab: builder.Vocabulary) -> None:
+    for index, string in vocab.items():
+        print(f"{index:6}: {string}")
+
+
+def _summarize_merges(merges: List[builder.Merge]) -> None:
+    for first, second, merged in merges:
+        print(f"{first} + {second} -> {merged}")

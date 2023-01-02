@@ -62,23 +62,18 @@ def _compute_pair_frequencies(
     and returns a list of these pairs together with their counts, ordered by
     frequency
     """
-    tokens = _tokenize(text, merge_list)
     frequencies: Dict[Tuple[str, str], int] = defaultdict(int)
-    for first, second in _pairs(tokens):
-        frequencies[first, second] += 1
+    for coarse_token in _coarse_tokenize(text):
+        for first, second in _pairs(_fine_tokenize(coarse_token, merge_list)):
+            frequencies[first, second] += 1
     tuples = [(pair[0], pair[1], count) for pair, count in frequencies.items()]
     return sorted(tuples, key=lambda t: t[2])
 
 
-def _tokenize(text: str, merge_list: List[Merge]) -> List[str]:
-    coarse_tokens = [
+def _coarse_tokenize(text: str) -> List[str]:
+    return [
         text_processing.to_unicode_bytes(token)
         for token in text_processing.pretokenize(text)
-    ]
-    return [
-        fine_token
-        for coarse_token in coarse_tokens
-        for fine_token in _fine_tokenize(coarse_token, merge_list)
     ]
 
 
@@ -100,8 +95,8 @@ def _apply_merge(in_tokens: List[str], merge: Merge) -> List[str]:
 
     out_tokens: List[str] = []
     startIndex = 0
-    while startIndex < len(in_tokens) - 1:
-        if in_tokens[startIndex] == first and in_tokens[startIndex + 1] == second:
+    while startIndex < len(in_tokens):
+        if startIndex < len(in_tokens) - 1 and in_tokens[startIndex] == first and in_tokens[startIndex + 1] == second:
             out_tokens.append(merged)
             startIndex += 2
         else:
