@@ -1,18 +1,20 @@
 from collections import defaultdict
 import json
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from independent.gpt.bpe import text_processing
+from independent.gpt.bpe import tokenizer
+from independent.gpt.bpe import type_definitions
 
 
-Vocabulary = Dict[int, str]
-MergeList = Dict[Tuple[str, str], str]
-
+#
+# Builder
+#
 
 def build_vocabulary_and_merge_list(
         training_text: str,
         count_merges: int,
-) -> Tuple[Vocabulary, MergeList]:
+) -> Tuple[type_definitions.Vocabulary, type_definitions.MergeList]:
     """
     Builds:
         - a vocabulary: a dictionary mapping token index integers to token strings
@@ -20,8 +22,8 @@ def build_vocabulary_and_merge_list(
             another token in our vocabulary
     """
 
-    vocabulary: Vocabulary = {}
-    merge_list: MergeList = {}
+    vocabulary: type_definitions.Vocabulary = {}
+    merge_list: type_definitions.MergeList = {}
     next_available_index = 0
 
     # Establish initial vocabulary of the 256 individual bytes
@@ -58,7 +60,7 @@ PairFrequency = Tuple[str, str, int]
 
 def _compute_pair_frequencies(
         text: str,
-        merge_list: MergeList,
+        merge_list: type_definitions.MergeList,
 ) -> List[PairFrequency]:
     """
     Tokenizes given the merge_list, finds all pairs of adjacent tokens,
@@ -66,43 +68,11 @@ def _compute_pair_frequencies(
     frequency
     """
     frequencies: Dict[Tuple[str, str], int] = defaultdict(int)
-    for coarse_token in _coarse_tokenize(text):
-        for first, second in _pairs(_fine_tokenize(coarse_token, merge_list)):
+    for coarse_token in tokenizer.coarse_tokenize(text):
+        for first, second in _pairs(tokenizer.fine_tokenize(coarse_token, merge_list)):
             frequencies[first, second] += 1
     tuples = [(pair[0], pair[1], count) for pair, count in frequencies.items()]
     return sorted(tuples, key=lambda t: t[2])
-
-
-def _coarse_tokenize(text: str) -> List[str]:
-    # TODO: cache
-    return [
-        text_processing.to_unicode_bytes(token)
-        for token in text_processing.pretokenize(text)
-    ]
-
-
-def _fine_tokenize(string: str, merge_list: MergeList) -> List[str]:
-    # Start by breaking the string into 1 byte tokens
-    tokens = list(string)
-
-    # Work through the string, checking each pair of tokens in turn for presence in the merge list
-    while True:
-        out_tokens: List[str] = []
-        start_index = 0
-        while start_index < len(tokens):
-            if start_index < len(tokens) - 1:
-                first = tokens[start_index]
-                second = tokens[start_index + 1]
-                if (first, second) in merge_list:
-                    out_tokens.append(merge_list[first, second])
-                    start_index += 2
-                    continue
-            out_tokens.append(tokens[start_index])
-            start_index += 1
-
-        if out_tokens == tokens:
-            return out_tokens
-        tokens = out_tokens  # loop around to continue merging larger and larger tokens
 
 
 def _pairs(
@@ -123,48 +93,38 @@ def _pairs(
     return pairs
 
 
-def _insert_pair_frequency(
-        pair_frequencies: List[PairFrequency],
-        new_pair_frequency: PairFrequency,
-) -> None:
-    index_to_insert_at: Optional[int] = None
-    for index in range(len(pair_frequencies)):
-        if pair_frequencies[index][2] > new_pair_frequency[2]:
-            index_to_insert_at = index
-            break
-    if index_to_insert_at is not None:
-        pair_frequencies.insert(index_to_insert_at, new_pair_frequency)
-    else:
-        pair_frequencies.append(new_pair_frequency)
+def _output_progress_dot() -> None:
+    print(".", end="", flush=True)
 
 
-def remove_base_byte_vocab(vocab: Vocabulary) -> Vocabulary:
+#
+# Output helpers
+#
+
+
+def remove_base_byte_vocab(vocab: type_definitions.Vocabulary) -> type_definitions.Vocabulary:
     copy = dict(vocab)
     for index in range(256):
         del copy[index]
     return copy
 
 
-def summarize_vocab(vocab: Vocabulary) -> None:
+def summarize_vocab(vocab: type_definitions.Vocabulary) -> None:
     for index, string in vocab.items():
         print(f"{index:6}: {string}")
 
 
-def summarize_merges(merges: MergeList) -> None:
+def summarize_merges(merges: type_definitions.MergeList) -> None:
     for t, merged in merges.items():
         first, second = t
         print(f"{first} + {second} -> {merged}")
 
 
-def _output_progress_dot() -> None:
-    print(".", end="", flush=True)
-
-
-def serialize_vocab(vocab: Vocabulary) -> str:
+def serialize_vocab(vocab: type_definitions.Vocabulary) -> str:
     return json.dumps(vocab, indent=3)
 
 
-def serialize_merges(merges: MergeList) -> str:
+def serialize_merges(merges: type_definitions.MergeList) -> str:
     output_string = ""
     for t, _ in merges.items():
         first, second = t
