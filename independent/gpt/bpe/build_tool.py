@@ -1,6 +1,7 @@
 import argparse
 
 from independent.gpt.bpe import builder
+from independent.gpt.bpe import input_output
 
 
 # Usage:
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     # builder.summarize_merges(merges)
 
     with open(args.output_vocab_file, "w") as file:
-        file.write(builder.serialize_vocabulary(vocab))
+        file.write(input_output.serialize_vocabulary(vocab))
     with open(args.output_merge_file, "w") as file:
-        file.write(builder.serialize_merges(merges))
+        file.write(input_output.serialize_merges(merges))
     print("\nWrote files.")

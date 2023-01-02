@@ -1,7 +1,8 @@
 from textwrap import dedent
-from typing import Dict, List
+from typing import Dict
 
 from independent.gpt.bpe import builder
+from independent.gpt.bpe import input_output
 from independent.gpt.bpe import text_processing
 from independent.gpt.bpe import tokenizer
 
@@ -49,7 +50,7 @@ def test_build_vocab():
         262: "Ġjug",
         263: "Big",
     }
-    assert builder.remove_base_byte_vocab(vocab) == expected_vocab
+    assert input_output.remove_base_byte_vocab(vocab) == expected_vocab
 
     expected_merges = dedent("""
         Ġ d
@@ -61,7 +62,7 @@ def test_build_vocab():
         Ġ jug
         B ig
     """)
-    assert "\n" + builder.serialize_merges(merges) == expected_merges
+    assert "\n" + input_output.serialize_merges(merges) == expected_merges
 
 
 def test_tokenize():
@@ -77,7 +78,7 @@ def test_tokenize():
         263: "Big",
     }
     vocab_index_to_token.update(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
-    vocab_token_to_index = builder.invert_vocabulary(vocab_index_to_token)
+    vocab_token_to_index = input_output.invert_vocabulary(vocab_index_to_token)
     merge_list = {
         ("Ġ", "d"): "Ġd",
         ("u", "g"): "ug",
