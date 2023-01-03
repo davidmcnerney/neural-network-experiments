@@ -4,20 +4,21 @@ from independent.gpt.bpe import helpers
 from independent.gpt.bpe import type_definitions
 
 
-def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByToken:
+def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByToken) -> type_definitions.VocabularyByIndex:
     return helpers.invert_dictionary(vocabulary_by_index)
 
 
-def remove_base_byte_vocab(vocab: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByIndex:
+def remove_base_byte_vocab(vocab: type_definitions.VocabularyByToken) -> type_definitions.VocabularyByToken:
     copy = dict(vocab)
-    for index in range(256):
-        del copy[index]
+    for token, index in vocab.items():
+        if index < 256:
+            del copy[token]
     return copy
 
 
-def summarize_vocabulary(vocab: type_definitions.VocabularyByIndex) -> None:
-    for index, string in vocab.items():
-        print(f"{index:6}: {string}")
+def summarize_vocabulary(vocab: type_definitions.VocabularyByToken) -> None:
+    for token, index in vocab.items():
+        print(f"{token}: {index:6}")
 
 
 def summarize_merges(merges: type_definitions.MergeList) -> None:
@@ -26,7 +27,7 @@ def summarize_merges(merges: type_definitions.MergeList) -> None:
         print(f"{first} + {second} -> {merged}")
 
 
-def serialize_vocabulary(vocab: type_definitions.VocabularyByIndex) -> str:
+def serialize_vocabulary(vocab: type_definitions.VocabularyByToken) -> str:
     return json.dumps(vocab, indent=3)
 
 
@@ -38,7 +39,7 @@ def serialize_merge_list(merges: type_definitions.MergeList) -> str:
     return output_string
 
 
-def deserialize_vocabulary(string: str) -> type_definitions.VocabularyByIndex:
+def deserialize_vocabulary(string: str) -> type_definitions.VocabularyByToken:
     return json.loads(string)
 
 
@@ -51,7 +52,7 @@ def deserialize_merge_list(string: str) -> type_definitions.MergeList:
     return merge_list
 
 
-def load_vocabulary_from_file(filename: str) -> type_definitions.VocabularyByIndex:
+def load_vocabulary_from_file(filename: str) -> type_definitions.VocabularyByToken:
     with open(filename) as file:
         contents = file.read()
         return deserialize_vocabulary(contents)

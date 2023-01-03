@@ -13,20 +13,20 @@ from independent.gpt.bpe import type_definitions
 def build_vocabulary_and_merge_list(
         training_text: str,
         count_merges: int,
-) -> Tuple[type_definitions.VocabularyByIndex, type_definitions.MergeList]:
+) -> Tuple[type_definitions.VocabularyByToken, type_definitions.MergeList]:
     """
     Builds:
-        - a vocabulary: a dictionary mapping token index integers to token strings
+        - a vocabulary: a dictionary mapping token strings to token index integers
         - a merge list: a list of pairs of tokens which should be combined to yield
             another token in our vocabulary
     """
 
-    vocabulary: type_definitions.VocabularyByIndex = {}
+    vocabulary: type_definitions.VocabularyByToken = {}
     merge_list: type_definitions.MergeList = {}
     next_available_index = 0
 
     # Establish initial vocabulary of the 256 individual bytes
-    vocabulary.update(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
+    vocabulary.update(text_processing.UNICODE_REPRESENTATION_TO_BYTE)
     next_available_index += 256
 
     # Iteratively add merges until either we've done the allowed count_merges,
@@ -46,7 +46,7 @@ def build_vocabulary_and_merge_list(
         merged = first + second
 
         merge_list[first, second] = merged
-        vocabulary[next_available_index] = merged
+        vocabulary[merged] = next_available_index
         next_available_index += 1
 
         merges_remaining -= 1

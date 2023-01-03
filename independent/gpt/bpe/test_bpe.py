@@ -40,17 +40,20 @@ def test_build_vocab():
     # builder.summarize_merges(merges)
     # assert False
 
-    expected_vocab = {
-        256: "Ġd",
-        257: "ug",
-        258: "ig",
-        259: "Ġdug",
-        260: "Ġdig",
-        261: "jug",
-        262: "Ġjug",
-        263: "Big",
-    }
-    assert input_output.remove_base_byte_vocab(vocab) == expected_vocab
+    expected_vocab = dedent("""
+        {
+           "\\u0120d": 256,
+           "ug": 257,
+           "ig": 258,
+           "\\u0120dug": 259,
+           "\\u0120dig": 260,
+           "jug": 261,
+           "\\u0120jug": 262,
+           "Big": 263
+        }
+    """)
+    actual_vocab = input_output.serialize_vocabulary(input_output.remove_base_byte_vocab(vocab))
+    assert "\n" + actual_vocab + "\n" == expected_vocab
 
     expected_merges = dedent("""
         Ġ d
@@ -62,7 +65,8 @@ def test_build_vocab():
         Ġ jug
         B ig
     """)
-    assert "\n" + input_output.serialize_merge_list(merges) == expected_merges
+    actual_merges = input_output.serialize_merge_list(merges)
+    assert "\n" + actual_merges == expected_merges
 
 
 def test_tokenize():
