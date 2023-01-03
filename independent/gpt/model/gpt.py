@@ -11,14 +11,14 @@ class GPT(nn.Module):
         self.config = config
 
         # Set up our neural network: embedding, transformer layers, and final projection.
-        self.transformer = nn.ModuleDict(dict(
-            token_embedding = nn.Embedding(config.vocabulary_size, config.embedding_size),
-            position_embedding = nn.Embedding(config.block_size, config.embedding_size),
-            dropout = nn.Dropout(config.embedding_dropout),
+        self.transformer = nn.ModuleDict({
+            "token_embedding": nn.Embedding(config.vocabulary_size, config.embedding_size),
+            "position_embedding": nn.Embedding(config.block_size, config.embedding_size),
+            "dropout": nn.Dropout(config.embedding_dropout),
             # TODO: one Block per layer, contained in a nn.ModuleList
             # TODO: LayerNorm
             # TODO: final projection Linear
-        ))
+        })
 
         # Initialize weights for our immediate children (or all?)
         self.apply(self._initialize_weights)
@@ -30,10 +30,16 @@ class GPT(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         input: tensor of token indices: batch_size x seq_length
+            this corresponds to an input body of text
         output: tensor of logits: batch_size x seq_length x vocab_size
+            this corresponds to a single next token of output text
 
         seq_length is limited by config.block_size.
         """
+
+        # Input checks
+        if x.size(1) > self.config.block_size:
+            raise Exception("Input sequence length exceeds block size")
 
         # Token embedding
         x = self.transformer.token_embedding(x)   # batch_size x seq_length x embedding_size
@@ -45,16 +51,25 @@ class GPT(nn.Module):
         # Dropout
         x = self.transformer.dropout(x)
 
-        # TODO: layers
+        # TODO: all the layers
 
         # TODO: layer norm
 
-        # TOOD: final projection
+        # TODO: final projection
 
         return x
 
+    def generate(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        input: tensor of token indices: batch_size x seq_length
+            this corresponds to an input body of text
+        output: tensor of token indices: batch_size x max_output_tokens
+            this corresponds to an output body of text
+        """
+        return x   # TODO
+
     @staticmethod
-    def _initialize_weights( module):
+    def _initialize_weights(module):
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
