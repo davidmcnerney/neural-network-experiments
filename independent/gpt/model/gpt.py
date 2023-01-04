@@ -73,6 +73,10 @@ class GPT(nn.Module):
         """
         return x   # TODO
 
+    def summarize_parameters(self) -> None:
+        count_parameters = sum(p.numel() for p in self.parameters())
+        print(f"Count parameters: {count_parameters}")
+
     @staticmethod
     def _initialize_weights(module):
         if isinstance(module, nn.Linear):

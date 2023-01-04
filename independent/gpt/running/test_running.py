@@ -14,3 +14,4 @@ def test_forward():
     y = gpt(x)
 
     assert y.shape == torch.Size([batch_size, sequence_length, config.embedding_size])
+    gpt.summarize_parameters()
