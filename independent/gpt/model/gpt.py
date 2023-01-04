@@ -1,8 +1,8 @@
 import torch
 from torch import nn
 
+from independent.gpt.model.block import Block
 from independent.gpt.running.configuration import Configuration
-
 
 class GPT(nn.Module):
     def __init__(self, config: Configuration):
@@ -11,10 +11,13 @@ class GPT(nn.Module):
         self.config = config
 
         # Set up our neural network: embedding, transformer layers, and final projection.
+        # Question: Do we get any benefit from using ModuleDict here, as opposed to making each thing
+        # just an attribute, e.g. self.token_embedding = ... ?
         self.transformer = nn.ModuleDict({
             "token_embedding": nn.Embedding(config.vocabulary_size, config.embedding_size),
             "position_embedding": nn.Embedding(config.block_size, config.embedding_size),
             "dropout": nn.Dropout(config.embedding_dropout),
+            "layers": nn.ModuleList([Block(config) for _ in range(config.count_layers)])
             # TODO: one Block per layer, contained in a nn.ModuleList
             # TODO: LayerNorm
             # TODO: final projection Linear
@@ -42,20 +45,22 @@ class GPT(nn.Module):
             raise Exception("Input sequence length exceeds block size")
 
         # Token embedding
-        x = self.transformer.token_embedding(x)   # batch_size x seq_length x embedding_size
+        x = self.transformer.token_embedding(x)   # -> batch_size x seq_length x embedding_size
 
         # Add position embedding
         positions = torch.arange(0, x.size(1), dtype=torch.long, device=x.device).unsqueeze(0)  # 1 x seq_length
         x = x + self.transformer.position_embedding(positions)
 
         # Dropout
-        x = self.transformer.dropout(x)
+        x = self.transformer.dropout(x)   # -> batch_size x seq_length x embedding_size
 
-        # TODO: all the layers
+        # Layers
+        for block in self.transformer.layers:
+            x = block(x)
 
         # TODO: layer norm
 
-        # TODO: final projection
+        # TODO: final output projection
 
         return x
 

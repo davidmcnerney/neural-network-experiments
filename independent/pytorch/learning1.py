@@ -6,5 +6,5 @@ vocab_size = 5
 
 l = torch.rand([batch_size, seq_size, vocab_size])
 print(l)
-l2 = l[:,-1,:]
+l2 = l[:, -1, :]
 print(l2)
