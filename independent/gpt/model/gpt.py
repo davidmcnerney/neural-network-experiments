@@ -66,7 +66,7 @@ class GPT(nn.Module):
 
         return x
 
-    def generate(self, x: torch.Tensor) -> torch.Tensor:
+    def generate(self, x: torch.Tensor, max_output_tokens: int) -> torch.Tensor:
         """
         input: tensor of token indices: batch_size x seq_length
             this corresponds to an input body of text
