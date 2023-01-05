@@ -1,3 +1,5 @@
+import math
+
 import torch
 from torch import nn
 
@@ -24,7 +26,6 @@ class GPT(nn.Module):
         self.final_output_projection = nn.Linear(config.embedding_size, config.vocabulary_size, bias=False)
 
         # Initialize weights for our immediate children (or all?)
-        self.apply(self._initialize_weights)
 
         # Different initialization for attention head and transformer block output projections
         # Andrej called these "residual" projections, but I don't yet understand why
@@ -78,8 +79,22 @@ class GPT(nn.Module):
         count_parameters = sum(p.numel() for p in self.parameters())
         print(f"Count parameters: {count_parameters}")
 
+        # for name, parameter in self.named_parameters():
+        #     print(f"   {name}")
+
+        print("\n")
+
+    def _initialize_weights(self):
+        self.apply(self._initialize_weights_callback)
+
+        # Different initialization for some of our internal output projections. Not sure of the exact rationale here
+        standard_deviation = 0.02 / math.sqrt(2 * self.config.count_layers)
+        for parameter_name, parameter in self.named_parameters():
+            if parameter_name.endswith('.output_projection.weight'):
+                torch.nn.init.normal_(parameter, mean=0.0, std=standard_deviation)
+
     @staticmethod
-    def _initialize_weights(module):
+    def _initialize_weights_callback(module):
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
