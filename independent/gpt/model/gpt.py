@@ -2,6 +2,7 @@ import math
 
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from independent.gpt.model.block import Block
 from independent.gpt.running.configuration import Configuration
@@ -69,11 +70,41 @@ class GPT(nn.Module):
     def generate(self, x: torch.Tensor, max_output_tokens: int) -> torch.Tensor:
         """
         input: tensor of token indices: batch_size x seq_length
-            this corresponds to an input body of text
-        output: tensor of token indices: batch_size x max_output_tokens
-            this corresponds to an output body of text
+            this corresponds to input bodies of text
+        output: tensor of token indices: batch_size x seq_length+max_output_tokens
+            this corresponds to input bodies of text, completed
+
+        TODO: support temperature, top_k
         """
-        return x   # TODO
+        for _ in range (max_output_tokens):
+            x_cropped = self._crop_input(x)
+            next_indices = self.sample(x_cropped)
+            x = torch.cat((x, next_indices), dim=1)
+        return x
+
+    def sample(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        input: tensor of token indices: batch_size x seq_length
+            seq_length must be <= block_size
+        output: tensor of token indices: batch size x 1
+
+        Returns the predicted next token in each sequence of the batch.
+        """
+        logits = self(x)                                            # batch_size x seq_length x vocab_size
+        last_logits = logits[:, -1, :]                              # batch_size x vocab_size
+        probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size
+        next_indices = torch.multinomial(probs, num_samples=1)      # batch_size x 1
+        return next_indices
+
+    def _crop_input(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Drops older elements of each sequence in the batch so as to keep sequence length below
+        configured block_size.
+        """
+        if x.size(1) <= self.config.block_size:
+            return x
+        else:
+            return x[:, -self.config.block_size:]
 
     def summarize_parameters(self) -> None:
         count_parameters = sum(p.numel() for p in self.parameters())
