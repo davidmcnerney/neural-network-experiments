@@ -3,6 +3,7 @@ import torch
 from independent.gpt.model.gpt import GPT
 from independent.gpt.running.configuration import Configuration
 
+
 def test_forward():
     batch_size = 1
     sequence_length = 4
@@ -13,5 +14,7 @@ def test_forward():
     gpt = GPT(config=config)
     y = gpt(x)
 
-    assert y.shape == torch.Size([batch_size, sequence_length, config.embedding_size])
+    assert y.shape == torch.Size([batch_size, sequence_length, config.vocabulary_size])
+
+    print("\n")
     gpt.summarize_parameters()

@@ -4,6 +4,7 @@ from torch import nn
 from independent.gpt.model.block import Block
 from independent.gpt.running.configuration import Configuration
 
+
 class GPT(nn.Module):
     def __init__(self, config: Configuration):
         super().__init__()
@@ -17,11 +18,10 @@ class GPT(nn.Module):
             "token_embedding": nn.Embedding(config.vocabulary_size, config.embedding_size),
             "position_embedding": nn.Embedding(config.block_size, config.embedding_size),
             "dropout": nn.Dropout(config.embedding_dropout),
-            "layers": nn.ModuleList([Block(config) for _ in range(config.count_layers)])
-            # TODO: one Block per layer, contained in a nn.ModuleList
-            # TODO: LayerNorm
-            # TODO: final projection Linear
+            "layers": nn.ModuleList([Block(config) for _ in range(config.count_layers)]),
+            "layer_norm": nn.LayerNorm(config.embedding_size),
         })
+        self.final_output_projection = nn.Linear(config.embedding_size, config.vocabulary_size, bias=False)
 
         # Initialize weights for our immediate children (or all?)
         self.apply(self._initialize_weights)
@@ -56,11 +56,12 @@ class GPT(nn.Module):
 
         # Layers
         for block in self.transformer.layers:
-            x = block(x)
+            x = block(x)   # -> shape unchanged
 
-        # TODO: layer norm
+        x = self.transformer.layer_norm(x)
 
-        # TODO: final output projection
+        # Final output projection -> logits for each token in our vocabulary
+        x = self.final_output_projection(x)     # -> batch_size x seq_length x vocab_size
 
         return x
 
