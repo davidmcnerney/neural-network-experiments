@@ -10,7 +10,7 @@ def test_forward():
     x = torch.tensor([[100, 200, 300, 400]])   # token indices: batch size x seq length
     assert x.shape == torch.Size([batch_size, sequence_length])
 
-    config = Configuration.standard()
+    config = Configuration.nano()
     gpt = GPT(config=config)
     y = gpt(x)
 

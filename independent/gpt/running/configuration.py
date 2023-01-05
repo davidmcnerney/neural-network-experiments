@@ -47,3 +47,21 @@ class Configuration:
             attention_dropout=0.1,
             projection_dropout=0.1,
         )
+
+    @classmethod
+    def nano(cls) -> "Configuration":
+        return cls(
+            vocabulary_size=10257,
+            block_size=256,
+
+            embedding_size=48,
+            fully_connected_size=192,
+            head_size=16,
+
+            count_layers=3,
+            count_heads=3,
+
+            embedding_dropout=0.1,
+            attention_dropout=0.1,
+            projection_dropout=0.1,
+        )
