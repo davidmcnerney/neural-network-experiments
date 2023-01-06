@@ -15,7 +15,7 @@ class SelfAttention(nn.Module):
 
         # Query, key, and value projections, combined together and for all samples in the batch
         #   queries and keys are conceptually symmetrical and generate self-attention matrix
-        self.query_key_value_projection = nn.Linear(config.embedding_size, 3 * config.embedding_size)
+        self.query_key_value_projection = nn.Linear(config.embedding_size, 3 * config.embedding_size, bias=False)
 
         # Mask - we use this to prevent attention from earlier tokens to later ones in the sequence
         # 1 x 1 x block_size x block_size
