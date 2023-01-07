@@ -67,6 +67,18 @@ class GPT(nn.Module):
 
         return x
 
+    def calculate_loss(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        """
+        input:
+            logits tensor, as returned from .forward()
+            targets tensor: batch size x seq_length, contains labelled token indices
+        """
+        # We flatten leading dimensions of both logits and targets, so that logits is
+        # (batch_size * seq_length) x vocab_size, and targets is (batch_size * seq length) (I think!)
+        flattened_logits = logits.view(-1, logits.size(-1))
+        flattened_targets = targets.view(-1)
+        return F.cross_entropy(flattened_logits, flattened_targets, ignore_index=-1)   # do I need ignore_index -1 here?
+
     def generate(self, x: torch.Tensor, max_output_tokens: int) -> torch.Tensor:
         """
         input: tensor of token indices: batch_size x seq_length

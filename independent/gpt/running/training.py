@@ -1,7 +1,9 @@
+import statistics
 from typing import List, Tuple
 
 import torch
 from torch import nn
+import torch.nn.utils
 import torch.optim
 import torch.utils.data
 
@@ -14,6 +16,8 @@ def get_optimizer(model: GPT) -> torch.optim.Optimizer:
     and embedding weights.
     """
     parameters_requiring_weight_decay, parameters_not_requiring_weight_decay = _parameters_by_weight_decay_requirement(model)
+    print(f"parameters_requiring_weight_decay: {parameters_requiring_weight_decay}")
+    print(f"parameters_not_requiring_weight_decay: {parameters_not_requiring_weight_decay}")
     groups = [
         {"params": parameters_requiring_weight_decay, "weight_decay": model.config.weight_decay},
         {"params": parameters_not_requiring_weight_decay, "weight_decay": 0.0},
@@ -22,10 +26,37 @@ def get_optimizer(model: GPT) -> torch.optim.Optimizer:
 
 
 def train(
-    model: nn.Module,
+    model: GPT,
     dataset: torch.utils.data.Dataset,
 ) -> None:
-    pass
+    # TODO: set num_workers for multiprocessing in data loader
+    # TODO: make sure we are on the right devices everywhere
+    # All this code is in minGPT and nanoGPT
+
+    optimizer = get_optimizer(model)
+
+    loader = torch.utils.data.DataLoader(
+        dataset=dataset,
+        sampler=torch.utils.data.RandomSampler(dataset, replacement=True, num_samples=int(1e10)),
+        shuffle=False,
+        pin_memory=True,
+        batch_size=model.config.batch_size,
+    )
+
+    for epoch_num in range(model.config.count_epochs):
+        epoch_losses: List[float] = []
+        for batch in iter(loader):
+            x, y = batch
+            logits = model(x)
+            loss = model.calculate_loss(logits, y)
+            model.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad(model.parameters(), model.config.grad_norm_clip)
+            optimizer.step()
+            epoch_losses.append(loss.item())
+        print(f"Epoch {epoch_num} loss {statistics.mean(epoch_losses)}")
+
+    print("Training complete")
 
 
 def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tensor], List[torch.Tensor]]:

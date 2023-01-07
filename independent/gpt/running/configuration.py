@@ -21,9 +21,11 @@ class Configuration:
             projection_dropout: float,
 
             # Training
+            count_epochs: int,
             batch_size: int,
             learning_rate: float,
             weight_decay: float,    # only applied to some parameters; see training.py
+            grad_norm_clip: float,
     ):
         self.vocabulary_size = vocabulary_size
         self.block_size = block_size
@@ -39,9 +41,11 @@ class Configuration:
         self.attention_dropout = attention_dropout
         self.projection_dropout = projection_dropout
 
+        self.count_epochs = count_epochs
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
+        self.grad_norm_clip = grad_norm_clip
 
     # TODO: revisit all these parameters
 
@@ -62,9 +66,11 @@ class Configuration:
             attention_dropout=0.1,
             projection_dropout=0.1,
 
+            count_epochs=5,
             batch_size=32767,
             learning_rate=1e-3,
             weight_decay=0.2,       
+            grad_norm_clip=1.0,
         )
 
     @classmethod
@@ -84,7 +90,9 @@ class Configuration:
             attention_dropout=0.1,
             projection_dropout=0.1,
 
+            count_epochs=2,
             batch_size=64,
             learning_rate=1e-3,
             weight_decay=0.2,
+            grad_norm_clip=1.0,
         )
