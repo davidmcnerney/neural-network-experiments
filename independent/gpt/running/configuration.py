@@ -2,19 +2,28 @@ class Configuration:
     def __init__(
             self,
 
+            # Vocabulary and tokens
             vocabulary_size: int,   # How many tokens in our vocabulary
             block_size: int,        # Maximum sequence length
 
+            # Dimensionalities
             embedding_size: int,    # Size of embedding vector that represents a token
             fully_connected_size: int,
             head_size: int,
 
+            # Network size
             count_layers: int,
             count_heads: int,       # number of attention heads in each layer
 
+            # Dropout
             embedding_dropout: float,
             attention_dropout: float,
             projection_dropout: float,
+
+            # Training
+            batch_size: int,
+            learning_rate: float,
+            weight_decay: float,    # only applied to some parameters; see training.py
     ):
         self.vocabulary_size = vocabulary_size
         self.block_size = block_size
@@ -29,6 +38,12 @@ class Configuration:
         self.embedding_dropout = embedding_dropout
         self.attention_dropout = attention_dropout
         self.projection_dropout = projection_dropout
+
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+
+    # TODO: revisit all these parameters
 
     @classmethod
     def standard(cls) -> "Configuration":
@@ -46,6 +61,10 @@ class Configuration:
             embedding_dropout=0.1,
             attention_dropout=0.1,
             projection_dropout=0.1,
+
+            batch_size=32767,
+            learning_rate=1e-3,
+            weight_decay=0.2,       
         )
 
     @classmethod
@@ -64,4 +83,8 @@ class Configuration:
             embedding_dropout=0.1,
             attention_dropout=0.1,
             projection_dropout=0.1,
+
+            batch_size=64,
+            learning_rate=1e-3,
+            weight_decay=0.2,
         )
