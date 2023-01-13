@@ -25,7 +25,7 @@ def get_optimizer(model: GPT) -> torch.optim.Optimizer:
 
 def train(
     model: GPT,
-    dataset: torch.utils.data.Dataset,
+    dataset: torch.utils.data.TensorDataset,
 ) -> None:
     # TODO: set num_workers for multiprocessing in data loader
     # TODO: make sure we are on the right devices everywhere
@@ -35,7 +35,7 @@ def train(
 
     loader = torch.utils.data.DataLoader(
         dataset=dataset,
-        sampler=torch.utils.data.RandomSampler(dataset, replacement=True, num_samples=int(1e10)),
+        sampler=torch.utils.data.RandomSampler(dataset),
         shuffle=False,
         pin_memory=True,
         batch_size=model.config.batch_size,
@@ -49,7 +49,7 @@ def train(
             loss = model.calculate_loss(logits, y)
             model.zero_grad(set_to_none=True)
             loss.backward()
-            torch.nn.utils.clip_grad(model.parameters(), model.config.grad_norm_clip)
+            # TODO: add gradient clipping?
             optimizer.step()
             epoch_losses.append(loss.item())
         print(f"Epoch {epoch_num} loss {statistics.mean(epoch_losses)}")

@@ -8,7 +8,6 @@ from independent.gpt.running.training import train
 
 def test_train():
     config = Configuration.nano()
-    config.vocabulary_size = 4
     config.count_epochs = 1
     config.batch_size = 2
     model = GPT(config=config)
