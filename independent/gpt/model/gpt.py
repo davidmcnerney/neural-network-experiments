@@ -51,7 +51,8 @@ class GPT(nn.Module):
 
         # Add position embedding
         positions = torch.arange(0, x.size(1), dtype=torch.long, device=x.device).unsqueeze(0)  # 1 x seq_length
-        x = x + self.transformer.position_embedding(positions)
+        position_embedding = self.transformer.position_embedding(positions)  # 1 x seq_length x embedding_size
+        x = x + position_embedding                # -> batch_size x seq_length x embedding_size (broadcast to batch size)
 
         # Dropout
         x = self.transformer.dropout(x)   # -> batch_size x seq_length x embedding_size
@@ -97,15 +98,15 @@ class GPT(nn.Module):
 
     def sample(self, x: torch.Tensor) -> torch.Tensor:
         """
-        input: tensor of token indices: batch_size x seq_length
-            seq_length must be <= block_size
+        input: token indices: batch_size x seq_length
+            (seq_length must be <= block_size)
         output: tensor of token indices: batch size x 1
 
         Returns the predicted next token in each sequence of the batch.
         """
         logits = self(x)                                            # batch_size x seq_length x vocab_size
         last_logits = logits[:, -1, :]                              # batch_size x vocab_size
-        probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size
+        probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size  (dim=-1 normalizes values in the last dimension, i.e. vocab_size)
         next_indices = torch.multinomial(probs, num_samples=1)      # batch_size x 1
         return next_indices
 
@@ -141,7 +142,7 @@ class GPT(nn.Module):
                 torch.nn.init.normal_(parameter, mean=0.0, std=standard_deviation)
 
     @staticmethod
-    def _initialize_weights_callback(module):
+    def _initialize_weights_callback(module: nn.Module):
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
@@ -149,5 +150,5 @@ class GPT(nn.Module):
         elif isinstance(module, nn.Embedding):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
         elif isinstance(module, nn.LayerNorm):
-            torch.nn.init.zeros_(module.bias)
             torch.nn.init.ones_(module.weight)
+            torch.nn.init.zeros_(module.bias)
