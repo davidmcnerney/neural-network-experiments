@@ -7,7 +7,7 @@ from independent.gpt.running.training import train
 
 
 def test_train():
-    config = Configuration.nano()
+    config = Configuration.for_tests()
     config.count_epochs = 1
     config.batch_size = 2
     model = GPT(config=config)
@@ -26,7 +26,7 @@ def test_train():
 
 
 def test_forward():
-    config = Configuration.nano()
+    config = Configuration.for_tests()
     config.batch_size = 1
     model = GPT(config=config)
 
@@ -42,7 +42,7 @@ def test_forward():
 
 
 def test_forward_multiple_examples_in_batch():
-    config = Configuration.nano()
+    config = Configuration.for_tests()
     config.batch_size = 2
     model = GPT(config=config)
 
@@ -61,7 +61,7 @@ def test_forward_multiple_examples_in_batch():
 
 
 def test_generate():
-    config = Configuration.nano()
+    config = Configuration.for_tests()
     config.batch_size = 1
     model = GPT(config=config)
 

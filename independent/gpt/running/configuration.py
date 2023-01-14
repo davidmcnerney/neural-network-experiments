@@ -67,16 +67,16 @@ class Configuration:
             projection_dropout=0.1,
 
             count_epochs=5,
-            batch_size=32767,
+            batch_size=32768,
             learning_rate=1e-3,
             weight_decay=0.2,       
             grad_norm_clip=1.0,
         )
 
     @classmethod
-    def nano(cls) -> "Configuration":
+    def for_tests(cls) -> "Configuration":
         return cls(
-            vocabulary_size=10257,
+            vocabulary_size=1536,
             block_size=256,
 
             embedding_size=48,
