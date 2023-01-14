@@ -74,15 +74,15 @@ class GPT(nn.Module):
             logits tensor, as returned from .forward()
             targets tensor: batch size x seq_length, contains labelled token indices
         """
-        # We flatten leading dimensions of both logits and targets, so that logits is
-        # (batch_size * seq_length) x vocab_size, and targets is (batch_size * seq length) (I think!)
-        flattened_logits = logits.view(-1, logits.size(-1))
-        flattened_targets = targets.view(-1)
+        # We flatten leading dimensions of both logits and targets, so that F.cross_entropy()
+        # can match vectors of vocab_size in logits to scalars of token index in targets.
+        flattened_logits = logits.view(-1, logits.size(-1))     # (batch_size*seq_length) x vocab_size
+        flattened_targets = targets.view(-1)                    # (batch_size*seq_length)
         return F.cross_entropy(flattened_logits, flattened_targets, ignore_index=-1)   # do I need ignore_index -1 here?
 
     def generate(self, x: torch.Tensor, max_output_tokens: int) -> torch.Tensor:
         """
-        input: tensor of token indices: batch_size x seq_length
+        input: token indices - batch_size x seq_length
             this corresponds to input bodies of text
         output: tensor of token indices: batch_size x seq_length+max_output_tokens
             this corresponds to input bodies of text, completed
@@ -90,7 +90,7 @@ class GPT(nn.Module):
         TODO: support temperature, top_k
         """
         for _ in range (max_output_tokens):
-            x_cropped = self._crop_input(x)
+            x_cropped = self._trim_sequence_to_block_size(x)
             next_indices = self.sample(x_cropped)
             x = torch.cat((x, next_indices), dim=1)
         return x
@@ -109,10 +109,13 @@ class GPT(nn.Module):
         next_indices = torch.multinomial(probs, num_samples=1)      # batch_size x 1
         return next_indices
 
-    def _crop_input(self, x: torch.Tensor) -> torch.Tensor:
+    def _trim_sequence_to_block_size(self, x: torch.Tensor) -> torch.Tensor:
         """
         Drops older elements of each sequence in the batch so as to keep sequence length below
         configured block_size.
+
+        input: token indices - batch_size x seq length
+        output: token indices - batch_size x seq length (clipped to block_size)
         """
         if x.size(1) <= self.config.block_size:
             return x
