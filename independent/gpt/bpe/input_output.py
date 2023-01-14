@@ -4,7 +4,7 @@ from independent.gpt.bpe import helpers
 from independent.gpt.bpe import type_definitions
 
 
-def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByToken) -> type_definitions.VocabularyByIndex:
+def invert_vocabulary(vocabulary_by_index: type_definitions.VocabularyByIndex) -> type_definitions.VocabularyByToken:
     return helpers.invert_dictionary(vocabulary_by_index)
 
 

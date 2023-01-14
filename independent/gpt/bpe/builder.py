@@ -63,7 +63,7 @@ def _compute_pair_frequencies(
 ) -> List[PairFrequency]:
     """
     Tokenizes given the merge_list, finds all pairs of adjacent tokens,
-    and returns a list of these pairs together with their counts, ordered by
+    and returns a list of these pairs together with their counts, ordered ascending by
     frequency
     """
     frequencies: Dict[Tuple[str, str], int] = defaultdict(int)

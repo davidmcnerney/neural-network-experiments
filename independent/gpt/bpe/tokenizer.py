@@ -55,6 +55,9 @@ def fine_tokenize(string: str, merge_list: type_definitions.MergeList) -> List[s
             out_tokens.append(tokens[start_index])
             start_index += 1
 
+        # If we did no merges during this cycle, then we must be done.
         if out_tokens == tokens:
             return out_tokens
-        tokens = out_tokens  # loop around to continue merging larger and larger tokens
+
+        # loop around to continue merging larger and larger tokens
+        tokens = out_tokens

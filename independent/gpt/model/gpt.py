@@ -67,7 +67,8 @@ class GPT(nn.Module):
 
         return x
 
-    def calculate_loss(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+    @staticmethod
+    def calculate_loss(logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
         """
         input:
             logits tensor, as returned from .forward()

@@ -27,12 +27,12 @@ def train(
     model: GPT,
     dataset: torch.utils.data.TensorDataset,
 ) -> None:
-    # TODO: set num_workers for multiprocessing in data loader
     # TODO: make sure we are on the right devices everywhere
     #    The code for ^ can be found in minGPT and nanoGPT
 
     optimizer = get_optimizer(model)
 
+    # TODO: set num_workers for multiprocessing in data loader
     loader = torch.utils.data.DataLoader(
         dataset=dataset,
         sampler=torch.utils.data.RandomSampler(dataset),

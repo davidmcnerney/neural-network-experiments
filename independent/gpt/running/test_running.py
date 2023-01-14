@@ -11,6 +11,7 @@ def test_train():
     config.count_epochs = 1
     config.batch_size = 2
     model = GPT(config=config)
+
     x = torch.tensor([
         [100, 200, 300, 400],
         [101, 201, 301, 401],
@@ -20,6 +21,7 @@ def test_train():
         [11, 21, 31, 41],
     ])
     dataset = torch.utils.data.TensorDataset(x, y)
+
     train(model=model, dataset=dataset)
 
 

@@ -45,9 +45,9 @@ def pretokenize(string: str) -> List[str]:
 def to_unicode_byte_representation(string: str) -> str:
     """
     Converts a Unicode string into a another Unicode string that represents its bytes.
-    Simple characters like ! or A will look the same. Characters that aren't so readable
-    like spaces will change to other characters that are easier to read. Unicode characters
-    will change to other characters that represent their bytes. See unit tests for example.
+    Simple characters like ! or A will look the same. Characters that aren't so readable,
+    like spaces, will change to other characters that are easier to notice. Multibyte Unicode characters
+    will change to sequences of one readable character per byte. See unit tests for examples.
     """
     string_in_bytes = string.encode("utf-8")
     return "".join([BYTE_TO_UNICODE_REPRESENTATION[byte] for byte in string_in_bytes])
