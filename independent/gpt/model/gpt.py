@@ -47,24 +47,24 @@ class GPT(nn.Module):
             raise Exception("Input sequence length exceeds block size")
 
         # Token embedding
-        x = self.transformer.token_embedding(x)   # -> batch_size x seq_length x embedding_size
+        x = self.transformer.token_embedding(x)     # -> batch_size x seq_length x embedding_size
 
         # Add position embedding
         positions = torch.arange(0, x.size(1), dtype=torch.long, device=x.device).unsqueeze(0)  # 1 x seq_length
         position_embedding = self.transformer.position_embedding(positions)  # 1 x seq_length x embedding_size
-        x = x + position_embedding                # -> batch_size x seq_length x embedding_size (broadcast to batch size)
+        x = x + position_embedding                  # -> batch_size x seq_length x embedding_size (broadcasts 1st dim)
 
         # Dropout
-        x = self.transformer.dropout(x)   # -> batch_size x seq_length x embedding_size
+        x = self.transformer.dropout(x)             # -> batch_size x seq_length x embedding_size
 
         # Layers
         for block in self.transformer.layers:
-            x = block(x)   # -> shape unchanged
+            x = block(x)                            # -> shape unchanged
 
         x = self.transformer.layer_norm(x)
 
         # Final output projection -> logits for each token in our vocabulary
-        x = self.final_output_projection(x)     # -> batch_size x seq_length x vocab_size
+        x = self.final_output_projection(x)         # -> batch_size x seq_length x vocab_size
 
         return x
 
