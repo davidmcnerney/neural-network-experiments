@@ -83,11 +83,16 @@ def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tens
                 raise Exception(f"Parameter {parameter_name} does not end with expected `weight` or `bias`")
 
     parameters_by_name = {name: parameter for name, parameter in model.named_parameters()}
+
     # _summarize_set("names_requiring_weight_decay", names_requiring_weight_decay)
     # _summarize_set("names_not_requiring_weight_decay", names_not_requiring_weight_decay)
     # _summarize_set("parameters_by_name", set(parameters_by_name.keys()))
+
+    # Sanity checks
     if len(parameters_by_name) != len(names_requiring_weight_decay) + len(names_not_requiring_weight_decay):
         raise Exception
+    # TODO: further validation: e.g. the two lists should have no intersection
+
     requiring_weight_decay = [
         parameters_by_name[parameter_name]
         for parameter_name in sorted(names_requiring_weight_decay)

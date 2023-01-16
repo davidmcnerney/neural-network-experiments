@@ -127,8 +127,8 @@ class GPT(nn.Module):
         count_parameters = sum(p.numel() for p in self.parameters())
         print(f"Count parameters: {count_parameters}")
 
-        for name, parameter in self.named_parameters():
-            print(f"   {name}")
+        # for name, parameter in self.named_parameters():
+        #     print(f"   {name}")
 
         print("\n")
 
