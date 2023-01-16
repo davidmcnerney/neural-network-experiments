@@ -50,6 +50,30 @@ class Configuration:
     # TODO: revisit all these parameters
 
     @classmethod
+    def for_tests(cls) -> "Configuration":
+        return cls(
+            vocabulary_size=1536,
+            block_size=256,
+
+            embedding_size=48,
+            fully_connected_size=192,
+            head_size=16,
+
+            count_layers=3,
+            count_heads=3,
+
+            embedding_dropout=0.1,
+            attention_dropout=0.1,
+            projection_dropout=0.1,
+
+            count_epochs=2,
+            batch_size=64,
+            learning_rate=1e-3,
+            weight_decay=0.2,
+            grad_norm_clip=1.0,
+        )
+
+    @classmethod
     def standard(cls) -> "Configuration":
         return cls(
             vocabulary_size=50257,
@@ -92,31 +116,6 @@ class Configuration:
 
             count_epochs=1,
             batch_size=8,
-            learning_rate=1e-3,
-            weight_decay=0.2,
-            grad_norm_clip=1.0,
-        )
-
-
-    @classmethod
-    def for_tests(cls) -> "Configuration":
-        return cls(
-            vocabulary_size=1536,
-            block_size=256,
-
-            embedding_size=48,
-            fully_connected_size=192,
-            head_size=16,
-
-            count_layers=3,
-            count_heads=3,
-
-            embedding_dropout=0.1,
-            attention_dropout=0.1,
-            projection_dropout=0.1,
-
-            count_epochs=2,
-            batch_size=64,
             learning_rate=1e-3,
             weight_decay=0.2,
             grad_norm_clip=1.0,
