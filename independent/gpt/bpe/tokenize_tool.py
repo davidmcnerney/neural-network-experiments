@@ -1,7 +1,7 @@
 import argparse
 
-from independent.gpt.bpe import tokenizer
 from independent.gpt.bpe import input_output
+from independent.gpt.bpe import tokenizer
 
 
 # Usage:
@@ -9,7 +9,7 @@ from independent.gpt.bpe import input_output
 
 
 if __name__ == "__main__":
-    argument_parser = argparse.ArgumentParser("Build BPE")
+    argument_parser = argparse.ArgumentParser("Tokenize")
     argument_parser.add_argument("--input-file", type=str, required=True)
     argument_parser.add_argument("--vocab-file", type=str, required=True)
     argument_parser.add_argument("--merge-file", type=str, required=True)

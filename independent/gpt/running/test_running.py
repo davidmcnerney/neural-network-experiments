@@ -77,14 +77,13 @@ def test_generate():
     print(y)
 
 
-def test_all_configurations():
+def test_standard_configurations():
     # This test will surface any basic errors in configuration parameters that result in failed assertions
     # on model instantiation.
 
     all_configurations = [
         Configuration.for_tests(),
         Configuration.standard(),
-        Configuration.for_shakespeare(),
     ]
     for config in all_configurations:
         GPT(config=config).summarize_parameters()

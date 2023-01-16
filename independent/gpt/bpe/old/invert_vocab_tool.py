@@ -12,7 +12,7 @@ from independent.gpt.bpe import type_definitions
 
 
 if __name__ == "__main__":
-    argument_parser = argparse.ArgumentParser("Build BPE")
+    argument_parser = argparse.ArgumentParser("Invert vocab")
     argument_parser.add_argument("--input-vocab-file", type=str, required=True)
     argument_parser.add_argument("--output-vocab-file", type=str, required=True)
     args = argument_parser.parse_args()
