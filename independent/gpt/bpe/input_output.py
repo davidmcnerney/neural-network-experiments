@@ -1,4 +1,6 @@
 import json
+from pathlib import Path
+from typing import Union
 
 from independent.gpt.bpe import helpers
 from independent.gpt.bpe import type_definitions
@@ -52,13 +54,13 @@ def deserialize_merge_list(string: str) -> type_definitions.MergeList:
     return merge_list
 
 
-def load_vocabulary_from_file(filename: str) -> type_definitions.VocabularyByToken:
+def load_vocabulary_from_file(filename: Union[str,Path]) -> type_definitions.VocabularyByToken:
     with open(filename) as file:
         contents = file.read()
         return deserialize_vocabulary(contents)
 
 
-def load_merge_list_from_file(filename: str) -> type_definitions.MergeList:
+def load_merge_list_from_file(filename: Union[str,Path]) -> type_definitions.MergeList:
     with open(filename) as file:
         contents = file.read()
         return deserialize_merge_list(contents)
