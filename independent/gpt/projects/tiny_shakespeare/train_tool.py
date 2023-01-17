@@ -21,3 +21,5 @@ if __name__ == "__main__":
         model=model,
         dataset=dataset,
     )
+    # TODO: save the model for use in inference
+    #    - maybe save checkpoints

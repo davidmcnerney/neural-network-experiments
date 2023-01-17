@@ -43,7 +43,7 @@ def train(
     for epoch_num in range(model.config.count_epochs):
         epoch_losses: List[float] = []
         for batch in iter(loader):
-            x, y = batch                                    # x: token indices, batch size x seq length; y: same as x
+            x, y = batch                                    # both tensors containing token indices, batch size x seq length
             logits = model(x)                               # batch size x seq length x vocab size
             loss = model.calculate_loss(logits, y)
             model.zero_grad(set_to_none=True)
