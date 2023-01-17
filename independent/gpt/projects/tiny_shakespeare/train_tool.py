@@ -1,5 +1,5 @@
 from independent.gpt.model.gpt import GPT
-from independent.gpt.projects.tiny_shakespeare.configuration import config
+from independent.gpt.projects.tiny_shakespeare.configuration import configuration
 from independent.gpt.projects.tiny_shakespeare.dataset import TinyShakespeareDataset
 from independent.gpt.running.training import train
 
@@ -9,6 +9,7 @@ from independent.gpt.running.training import train
 
 
 if __name__ == "__main__":
+    config = configuration()
     model = GPT(config=config)
     dataset = TinyShakespeareDataset(
         filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.encoded_5000.txt",

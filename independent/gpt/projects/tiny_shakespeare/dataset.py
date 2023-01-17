@@ -1,5 +1,6 @@
 from typing import List
 
+import torch
 from torch.utils.data import Dataset
 
 from independent.gpt.bpe import input_output
@@ -21,10 +22,19 @@ class TinyShakespeareDataset(Dataset):
         self.tokens = self._tokenize(input_text, vocab_filename, merge_filename)
 
     def __getitem__(self, item):
-        return self.tokens[item:item + self.block_size]
+        x = self.tokens[item:(item + self.block_size)]
+        y = self.tokens[(item + 1):(item + 1 + self.block_size)]
+        return torch.tensor(x), torch.tensor(y)
 
     def __len__(self):
-        return len(self.tokens) - self.block_size + 1
+        # For each sample that we return, we need an X sequence and a Y sequence. Each element of Y is just
+        # the index + 1 position token from X. For example:
+        #       len(tokens) 4
+        #       block_size  3
+        #       available samples: only 1
+        #           X will be indices 0, 1 and 2
+        #           Y will be indices 1, 2 and 3
+        return len(self.tokens) - self.block_size + 1 - 1
 
     @staticmethod
     def _tokenize(
