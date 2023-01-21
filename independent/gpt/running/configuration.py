@@ -22,6 +22,7 @@ class Configuration:
 
             # Training
             count_epochs: int,
+            iterations_per_epoch: int,
             batch_size: int,
             learning_rate: float,
             weight_decay: float,    # only applied to some parameters; see training.py
@@ -42,6 +43,7 @@ class Configuration:
         self.projection_dropout = projection_dropout
 
         self.count_epochs = count_epochs
+        self.iterations_per_epoch = iterations_per_epoch
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
@@ -67,6 +69,7 @@ class Configuration:
             projection_dropout=0.1,
 
             count_epochs=2,
+            iterations_per_epoch=200,
             batch_size=64,
             learning_rate=1e-3,
             weight_decay=0.2,
@@ -91,6 +94,7 @@ class Configuration:
             projection_dropout=0.1,
 
             count_epochs=1,
+            iterations_per_epoch=200,
             batch_size=8,
             learning_rate=1e-3,
             weight_decay=0.2,       

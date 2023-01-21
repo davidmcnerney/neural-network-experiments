@@ -31,6 +31,7 @@ def train(
     for epoch_num in range(model.config.count_epochs):
         print(f"Epoch {epoch_num} ", end="")
         epoch_losses: List[float] = []
+        count_iterations = 0
         for batch in iter(loader):
             x, y = batch                                    # both tensors containing token indices, batch size x seq length
             logits = model(x)                               # batch size x seq length x vocab size
@@ -41,6 +42,10 @@ def train(
             optimizer.step()
             epoch_losses.append(loss.item())
             _output_progress_dot()
+
+            count_iterations += 1
+            if count_iterations > model.config.iterations_per_epoch:
+                break
         print(f" loss {statistics.mean(epoch_losses)}")
 
     print("Training complete.")
