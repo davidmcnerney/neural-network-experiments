@@ -29,6 +29,7 @@ def train(
     )
 
     for epoch_num in range(model.config.count_epochs):
+        print(f"Epoch {epoch_num} ", end="")
         epoch_losses: List[float] = []
         for batch in iter(loader):
             x, y = batch                                    # both tensors containing token indices, batch size x seq length
@@ -39,9 +40,10 @@ def train(
             # TODO: add gradient clipping?
             optimizer.step()
             epoch_losses.append(loss.item())
-        print(f"Epoch {epoch_num} loss {statistics.mean(epoch_losses)}")
+            _output_progress_dot()
+        print(f" loss {statistics.mean(epoch_losses)}")
 
-    print("Training complete")
+    print("Training complete.")
 
 
 def _get_optimizer(model: GPT) -> torch.optim.Optimizer:
@@ -111,3 +113,7 @@ def _summarize_set(description: str, input_set: Set):
     for item in as_list:
         print(f"   {item}")
     print("")
+
+
+def _output_progress_dot() -> None:
+    print(".", end="", flush=True)
