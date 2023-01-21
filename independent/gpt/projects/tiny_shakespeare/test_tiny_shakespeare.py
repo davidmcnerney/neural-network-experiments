@@ -26,6 +26,7 @@ def test_dataset_and_train():
     config = configuration()
     config.block_size = 3
     model = GPT(config=config)
+    model.summarize_parameters()
     dataset = TinyShakespeareDataset(
         filename=fixture_loader.path_to_file("corpus.txt"),
         vocab_filename=fixture_loader.path_to_file("vocab.json"),
