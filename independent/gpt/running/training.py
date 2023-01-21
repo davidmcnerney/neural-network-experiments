@@ -10,19 +10,6 @@ import torch.utils.data
 from independent.gpt.model.gpt import GPT
 
 
-def get_optimizer(model: GPT) -> torch.optim.Optimizer:
-    """
-    We configure an AdamW optimizer, with no weight decay for biases, layer normalization weights,
-    and embedding weights.
-    """
-    parameters_requiring_weight_decay, parameters_not_requiring_weight_decay = _parameters_by_weight_decay_requirement(model)
-    groups = [
-        {"params": parameters_requiring_weight_decay, "weight_decay": model.config.weight_decay},
-        {"params": parameters_not_requiring_weight_decay, "weight_decay": 0.0},
-    ]
-    return torch.optim.AdamW(groups, lr=model.config.learning_rate)
-
-
 def train(
     model: GPT,
     dataset: torch.utils.data.Dataset,
@@ -31,7 +18,7 @@ def train(
     #    The code for ^ can be found in minGPT and nanoGPT
     # TODO: call .train() to put model in training mode
 
-    optimizer = get_optimizer(model)
+    optimizer = _get_optimizer(model)
 
     # TODO: set num_workers for multiprocessing in data loader
     loader = torch.utils.data.DataLoader(
@@ -55,6 +42,19 @@ def train(
         print(f"Epoch {epoch_num} loss {statistics.mean(epoch_losses)}")
 
     print("Training complete")
+
+
+def _get_optimizer(model: GPT) -> torch.optim.Optimizer:
+    """
+    We configure an AdamW optimizer, with no weight decay for biases, layer normalization weights,
+    and embedding weights.
+    """
+    parameters_requiring_weight_decay, parameters_not_requiring_weight_decay = _parameters_by_weight_decay_requirement(model)
+    groups = [
+        {"params": parameters_requiring_weight_decay, "weight_decay": model.config.weight_decay},
+        {"params": parameters_not_requiring_weight_decay, "weight_decay": 0.0},
+    ]
+    return torch.optim.AdamW(groups, lr=model.config.learning_rate)
 
 
 def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tensor], List[torch.Tensor]]:
