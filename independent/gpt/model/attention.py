@@ -66,7 +66,8 @@ class SelfAttention(nn.Module):
         #   Note that our mask tensor is sized to block_size, which is the max sequence length. Our current
         #   sequence length may be shorter, so we have to trim the last two dimensions of the mask before use.
         #   -> shape unchanged
-        attention = attention.masked_fill(self.mask[:, :, :sequence_length, :sequence_length] == 0, float("-inf"))
+        trimmed_mask = self.mask[:, :, :sequence_length, :sequence_length]
+        attention = attention.masked_fill(trimmed_mask == 0, float("-inf"))
 
         # Softmax dim=-1, which processes each row such that its elements sum to 1.0
         #   -> shape unchanged
