@@ -20,9 +20,19 @@ def test_train():
         [10, 20, 30, 40],
         [11, 21, 31, 41],
     ])
-    dataset = torch.utils.data.TensorDataset(x, y)
+    training_dataset = torch.utils.data.TensorDataset(x, y)
 
-    train(model=model, dataset=dataset)
+    x = torch.tensor([
+        [500, 600, 700, 800],
+        [501, 601, 701, 801],
+    ])
+    y = torch.tensor([
+        [50, 60, 70, 80],
+        [51, 61, 71, 81],
+    ])
+    validation_dataset = torch.utils.data.TensorDataset(x, y)
+
+    train(model=model, training_dataset=training_dataset, validation_dataset=validation_dataset)
 
 
 def test_forward():

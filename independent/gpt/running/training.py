@@ -12,7 +12,8 @@ from independent.gpt.model.gpt import GPT
 
 def train(
     model: GPT,
-    dataset: torch.utils.data.Dataset,
+    training_dataset: torch.utils.data.Dataset,
+    validation_dataset: torch.utils.data.Dataset,
 ) -> None:
     # TODO: make sure we are on the right devices everywhere
     #    The code for ^ can be found in minGPT and nanoGPT
@@ -21,8 +22,14 @@ def train(
     optimizer = _get_optimizer(model)
 
     # TODO: set num_workers for multiprocessing in data loader
-    loader = torch.utils.data.DataLoader(
-        dataset=dataset,
+    training_loader = torch.utils.data.DataLoader(
+        dataset=training_dataset,
+        shuffle=True,
+        pin_memory=True,
+        batch_size=model.config.batch_size,
+    )
+    validation_loader = torch.utils.data.DataLoader(
+        dataset=validation_dataset,
         shuffle=True,
         pin_memory=True,
         batch_size=model.config.batch_size,
@@ -30,9 +37,11 @@ def train(
 
     for epoch_num in range(model.config.count_epochs):
         print(f"Epoch {epoch_num} ", end="")
-        epoch_losses: List[float] = []
-        count_iterations = 0
-        for batch in iter(loader):
+
+        # Train
+        epoch_training_losses: List[float] = []
+        count_training_iterations = 0
+        for batch in iter(training_loader):
             x, y = batch                                    # both tensors containing token indices, batch size x seq length
             logits = model(x)                               # batch size x seq length x vocab size
             loss = model.calculate_loss(logits, y)
@@ -40,13 +49,28 @@ def train(
             loss.backward()
             # TODO: add gradient clipping?
             optimizer.step()
-            epoch_losses.append(loss.item())
+            epoch_training_losses.append(loss.item())
             _output_progress_dot()
 
-            count_iterations += 1
-            if count_iterations > model.config.iterations_per_epoch:
+            count_training_iterations += 1
+            if count_training_iterations > model.config.training_iterations_per_epoch:
                 break
-        print(f" loss {statistics.mean(epoch_losses)}")
+
+        # Validate
+        with torch.no_grad():
+            epoch_validation_losses: List[float] = []
+            count_validation_iterations = 0
+            for batch in iter(validation_loader):
+                x, y = batch
+                logits = model(x)
+                loss = model.calculate_loss(logits, y)
+                epoch_validation_losses.append(loss.item())
+
+                count_validation_iterations += 1
+                if count_validation_iterations > model.config.validation_iterations_per_epoch:
+                    break
+
+        print(f" training loss {statistics.mean(epoch_training_losses)} validation loss {statistics.mean(epoch_validation_losses)}")
 
     print("Training complete.")
 
