@@ -6,11 +6,11 @@ def configuration() -> Configuration:
         vocabulary_size=5257,
         block_size=32,
 
-        embedding_size=32,
-        fully_connected_size=64,
-        head_size=8,
+        embedding_size=64,
+        fully_connected_size=128,
+        head_size=16,
 
-        count_layers=2,
+        count_layers=4,
         count_heads=4,
 
         embedding_dropout=0.1,
