@@ -59,6 +59,7 @@ class SelfAttention(nn.Module):
 
         # Attention matrix
         #   -> batch_size x count_heads x sequence_length x sequence_length
+        #   each element of this matrix is attention paid from token (row num) to token (col num) in the sequence.
         attention = query @ key.transpose(-2, -1)
         attention /= math.sqrt(self.config.head_size)
 
