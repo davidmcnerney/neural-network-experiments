@@ -104,7 +104,6 @@ class GPT(nn.Module):
 
         Returns the predicted next token in each sequence of the batch.
         """
-        # TODO: call .eval() to set eval mode here?
         logits = self(x)                                            # batch_size x seq_length x vocab_size
         last_logits = logits[:, -1, :]                              # batch_size x vocab_size
         probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size  (dim=-1 normalizes values in the last dimension, i.e. vocab_size)

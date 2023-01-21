@@ -16,7 +16,7 @@ if __name__ == "__main__":
     config = configuration()
     model = GPT(config=config)
     training_dataset, validation_dataset = InMemoryTokenDataset.load(
-        filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.encoded_5000.txt",
+        filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.txt",
         vocab_filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json",
         merge_filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe",
         block_size=config.block_size,
