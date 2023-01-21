@@ -3,7 +3,7 @@ import torch.utils.data
 
 from independent.gpt.model.gpt import GPT
 from independent.gpt.running.configuration import Configuration
-from independent.gpt.running.training import train
+from independent.gpt.running.train import train
 
 
 def test_train():

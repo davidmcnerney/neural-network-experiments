@@ -39,6 +39,7 @@ def train(
         print(f"Epoch {epoch_num} ", end="")
 
         # Train
+        model.train()
         epoch_training_losses: List[float] = []
         count_training_iterations = 0
         for batch in iter(training_loader):
@@ -57,6 +58,7 @@ def train(
                 break
 
         # Validate
+        model.eval()
         with torch.no_grad():
             epoch_validation_losses: List[float] = []
             count_validation_iterations = 0

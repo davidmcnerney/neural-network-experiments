@@ -125,7 +125,7 @@ def test_detokenize():
         263: "Big",
     }
     vocab_index_to_token.update(text_processing.BYTE_TO_UNICODE_REPRESENTATION)
-    text = tokenizer.detokenize(tokens,vocab_index_to_token)
+    text = tokenizer.detokenize(tokens, vocab_index_to_token)
     expected_text = """Big jug, dig dug."""
     assert text == expected_text
 

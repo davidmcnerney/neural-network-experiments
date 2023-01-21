@@ -4,7 +4,7 @@ from independent.gpt.model.gpt import GPT
 from independent.gpt.projects.tiny_shakespeare.configuration import configuration
 from independent.gpt.projects.tiny_shakespeare.test_fixtures.fixture_loader import fixture_loader
 from independent.gpt.running.dataset import InMemoryTokenDataset
-from independent.gpt.running.training import train
+from independent.gpt.running.train import train
 
 
 # encoded.txt was generated with this command:
