@@ -24,6 +24,7 @@ class TinyShakespeareDataset(Dataset):
     def __getitem__(self, item):
         x = self.tokens[item:(item + self.block_size)]
         y = self.tokens[(item + 1):(item + 1 + self.block_size)]
+        # TODO: call .to() to move to configured device, to support GPU
         return torch.tensor(x), torch.tensor(y)
 
     def __len__(self):

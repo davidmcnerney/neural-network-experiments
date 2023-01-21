@@ -29,6 +29,7 @@ def train(
 ) -> None:
     # TODO: make sure we are on the right devices everywhere
     #    The code for ^ can be found in minGPT and nanoGPT
+    # TODO: call .train() to put model in training mode
 
     optimizer = get_optimizer(model)
 

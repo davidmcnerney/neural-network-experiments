@@ -11,6 +11,7 @@ from independent.gpt.running.training import train
 if __name__ == "__main__":
     config = configuration()
     model = GPT(config=config)
+    # TODO: call .to() to move model to device, to support use of GPU
     dataset = TinyShakespeareDataset(
         filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.encoded_5000.txt",
         vocab_filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json",
