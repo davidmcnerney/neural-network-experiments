@@ -20,7 +20,7 @@ def configuration() -> Configuration:
         count_epochs=25,
         training_iterations_per_epoch=150,
         validation_iterations_per_epoch=25,
-        batch_size=8,
+        batch_size=64,
         learning_rate=1e-3,
         weight_decay=0.2,
         grad_norm_clip=1.0,
