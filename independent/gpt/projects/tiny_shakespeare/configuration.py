@@ -4,7 +4,7 @@ from independent.gpt.running.configuration import Configuration
 def configuration() -> Configuration:
     return Configuration(
         vocabulary_size=5257,
-        block_size=64,
+        block_size=128,
 
         embedding_size=128,
         fully_connected_size=512,
