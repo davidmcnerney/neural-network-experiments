@@ -129,8 +129,7 @@ class GPT(nn.Module):
 
         # for name, parameter in self.named_parameters():
         #     print(f"   {name}")
-
-        print("\n")
+        # print("\n")
 
     def _initialize_weights(self):
         self.apply(self._initialize_weights_callback)
