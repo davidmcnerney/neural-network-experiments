@@ -7,7 +7,7 @@ def configuration() -> Configuration:
         block_size=64,
 
         embedding_size=128,
-        fully_connected_size=256,
+        fully_connected_size=512,
         head_size=16,
 
         count_layers=4,
