@@ -17,7 +17,7 @@ def configuration() -> Configuration:
         attention_dropout=0.1,
         projection_dropout=0.1,
 
-        count_epochs=100,
+        count_epochs=25,
         training_iterations_per_epoch=150,
         validation_iterations_per_epoch=25,
         batch_size=8,
