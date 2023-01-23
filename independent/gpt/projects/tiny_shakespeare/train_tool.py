@@ -21,10 +21,12 @@ def parse_arguments() -> Tuple[str, str]:
     return args.model_file, args.continue_training
 
 
+def get_device() -> torch.device:
+    return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
 if __name__ == "__main__":
     model_filename, continue_training = parse_arguments()
-
-    # TODO: call .to() to move model to device, to support use of GPU
 
     if continue_training:
         model = torch.load(model_filename)
@@ -33,11 +35,17 @@ if __name__ == "__main__":
         model = GPT(config=config)
     model.summarize_parameters()
 
+    device = get_device()
+    model.to(device)
+    print(f"Using device: {device}")
+    # TODO: may need to use map_location in torch.load above to avoid errors if continuing training on different hardware?
+
     training_dataset, validation_dataset = InMemoryTokenDataset.load(
         filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.txt",
         vocab_filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json",
         merge_filename="/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe",
         block_size=model.config.block_size,
+        device=device,
     )
 
     train(

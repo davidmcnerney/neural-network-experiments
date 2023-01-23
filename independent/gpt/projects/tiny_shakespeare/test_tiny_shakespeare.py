@@ -17,6 +17,7 @@ def test_dataset():
         vocab_filename=fixture_loader.path_to_file("vocab.json"),
         merge_filename=fixture_loader.path_to_file("merges.bpe"),
         block_size=8,
+        device=torch.device("cpu"),
     )
 
     assert len(training_dataset) == 280 - 8
@@ -45,6 +46,7 @@ def test_dataset_and_train():
         vocab_filename=fixture_loader.path_to_file("vocab.json"),
         merge_filename=fixture_loader.path_to_file("merges.bpe"),
         block_size=config.block_size,
+        device=torch.device("cpu"),
     )
 
     train(model=model, training_dataset=training_dataset, validation_dataset=validation_dataset)

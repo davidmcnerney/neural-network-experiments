@@ -12,15 +12,16 @@ class InMemoryTokenDataset(Dataset):
             self,
             tokens: List[int],
             block_size: int,
+            device: torch.device,
     ):
         self.tokens = tokens
         self.block_size = block_size
+        self.device = device
 
     def __getitem__(self, item):
         x = self.tokens[item:(item + self.block_size)]
         y = self.tokens[(item + 1):(item + 1 + self.block_size)]
-        # TODO: call .to() to move to configured device, to support GPU
-        return torch.tensor(x), torch.tensor(y)
+        return torch.tensor(x, device=self.device), torch.tensor(y, device=self.device)
 
     def __len__(self):
         # For each sample that we return, we need an X sequence and a Y sequence. Each element of Y is just
@@ -40,6 +41,7 @@ class InMemoryTokenDataset(Dataset):
             vocab_filename: str,
             merge_filename: str,
             block_size: int,
+            device: torch.device,
     ) -> Tuple["InMemoryTokenDataset", "InMemoryTokenDataset"]:
         """
         Returns training (90%) and validation (10%) datasets.
@@ -49,8 +51,8 @@ class InMemoryTokenDataset(Dataset):
         tokens = cls._tokenize(input_text, vocab_filename, merge_filename)
         count_training_tokens, count_validation_tokens = cls._divide_tokens(len(tokens))
         return (
-            cls(tokens=tokens[:count_training_tokens], block_size=block_size),
-            cls(tokens=tokens[-count_validation_tokens:], block_size=block_size),
+            cls(tokens=tokens[:count_training_tokens], block_size=block_size, device=device),
+            cls(tokens=tokens[-count_validation_tokens:], block_size=block_size, device=device),
         )
 
     @staticmethod
