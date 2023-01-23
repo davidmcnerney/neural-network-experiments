@@ -1,5 +1,5 @@
 import statistics
-from typing import List, Set, Tuple
+from typing import List, Optional, Set, Tuple
 
 import torch
 from torch import nn
@@ -14,6 +14,7 @@ def train(
     model: GPT,
     training_dataset: torch.utils.data.Dataset,
     validation_dataset: torch.utils.data.Dataset,
+    model_save_filename: Optional[str] = None,
 ) -> None:
     # TODO: take a model save file path, and save after each epoch
     # TODO: make sure we are on the right devices everywhere
@@ -72,7 +73,10 @@ def train(
                 if count_validation_iterations > model.config.validation_iterations_per_epoch:
                     break
 
+        # Checkpoint
         print(f" training loss {statistics.mean(epoch_training_losses)} validation loss {statistics.mean(epoch_validation_losses)}")
+        if model_save_filename is not None:
+            torch.save(model, model_save_filename)
 
     print("Training complete.")
 
