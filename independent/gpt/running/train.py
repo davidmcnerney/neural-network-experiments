@@ -26,13 +26,11 @@ def train(
     training_loader = torch.utils.data.DataLoader(
         dataset=training_dataset,
         shuffle=True,
-        pin_memory=True,
         batch_size=model.config.batch_size,
     )
     validation_loader = torch.utils.data.DataLoader(
         dataset=validation_dataset,
         shuffle=True,
-        pin_memory=True,
         batch_size=model.config.batch_size,
     )
 
