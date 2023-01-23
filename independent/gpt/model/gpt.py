@@ -26,11 +26,10 @@ class GPT(nn.Module):
         })
         self.final_output_projection = nn.Linear(config.embedding_size, config.vocabulary_size, bias=False)
 
-        # Initialize weights for our immediate children (or all?)
+        # Weight tying - explained here: https://paperswithcode.com/method/weight-tying
+        self.transformer.token_embedding.weight = self.final_output_projection.weight
 
-        # Different initialization for attention head and transformer block output projections
-        # Andrej called these "residual" projections, but I don't yet understand why
-        # TODO
+        # TODO: Different initialization for attention head and transformer block output projections
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """

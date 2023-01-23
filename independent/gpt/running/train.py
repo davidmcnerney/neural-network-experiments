@@ -115,6 +115,10 @@ def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tens
             else:
                 raise Exception(f"Parameter {parameter_name} does not end with expected `weight` or `bias`")
 
+    # final_output_projection.weight (in the decay list) is tied to transformer.token_embedding.weight
+    # (in the no decay list). Since these weights are shared, we need to remove from one of the two lists.
+    names_requiring_weight_decay.remove("final_output_projection.weight")
+
     parameters_by_name = {name: parameter for name, parameter in model.named_parameters()}
 
     # _summarize_set("names_requiring_weight_decay", names_requiring_weight_decay)
