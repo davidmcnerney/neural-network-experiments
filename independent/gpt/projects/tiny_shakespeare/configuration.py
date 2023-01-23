@@ -13,9 +13,9 @@ def configuration() -> Configuration:
         count_layers=4,
         count_heads=8,
 
-        embedding_dropout=0.1,
-        attention_dropout=0.1,
-        projection_dropout=0.1,
+        embedding_dropout=0.2,
+        attention_dropout=0.2,
+        projection_dropout=0.2,
 
         count_epochs=100,
         training_iterations_per_epoch=150,
