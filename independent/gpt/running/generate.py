@@ -12,9 +12,10 @@ def generate(
         merge_list: type_definitions.MergeList,
         prompt: str,
         max_output_tokens: int,
+        device: torch.device,
 ) -> str:
     prompt_tokens = tokenizer.tokenize(prompt, vocabulary_by_token, merge_list)
-    x = torch.tensor(prompt_tokens).unsqueeze(0)
+    x = torch.tensor(prompt_tokens, device=device).unsqueeze(0)
     assert x.shape == torch.Size([1, len(prompt_tokens)])
     y = model.generate(x, max_output_tokens)
     completion_tokens = y.squeeze(0).tolist()

@@ -19,13 +19,21 @@ def parse_arguments() -> Tuple[str, str]:
     return args.model_file, args.prompt
 
 
+def get_device() -> torch.device:
+    return torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
 if __name__ == "__main__":
     model_filename, prompt = parse_arguments()
+
+    device = get_device()
+
     completion = generate(
         model=torch.load(model_filename),
         vocabulary_by_token=load_vocabulary_from_file("/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json"),
         merge_list=load_merge_list_from_file("/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe"),
         prompt=prompt,
         max_output_tokens=1000,
+        device=device,
     )
     print(completion)
