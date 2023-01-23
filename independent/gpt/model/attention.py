@@ -25,7 +25,7 @@ class SelfAttention(nn.Module):
         #    1 1 0 0
         #    1 1 1 0
         #    1 1 1 1
-        mask = torch.tril(torch.ones(config.block_size, config.block_size)).unsqueeze(0).unsqueeze(0)
+        mask = torch.tril(torch.ones(config.block_size, config.block_size)).unsqueeze(0).unsqueeze(0)  # 1 x 1 x block size x block size
         self.register_buffer("mask", mask)
 
         self.attention_dropout = nn.Dropout(config.attention_dropout)

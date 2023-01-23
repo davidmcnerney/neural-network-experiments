@@ -15,9 +15,9 @@ def train(
     training_dataset: torch.utils.data.Dataset,
     validation_dataset: torch.utils.data.Dataset,
 ) -> None:
+    # TODO: take a model save file path, and save after each epoch
     # TODO: make sure we are on the right devices everywhere
     #    The code for ^ can be found in minGPT and nanoGPT
-    # TODO: call .train() to put model in training mode
 
     optimizer = _get_optimizer(model)
 
