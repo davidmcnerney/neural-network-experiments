@@ -16,7 +16,8 @@ from independent.gpt.running.train import train
 def parse_arguments() -> Tuple[str, str]:
     argument_parser = argparse.ArgumentParser("Train")
     argument_parser.add_argument("--model-file", type=str, required=True)
-    argument_parser.add_argument("--continue", action=argparse.BooleanOptionalAction, dest="continue_training")
+    argument_parser.add_argument("--continue", action="store_true", dest="continue_training")
+    argument_parser.set_defaults(continue_training=False)
     args = argument_parser.parse_args()
     return args.model_file, args.continue_training
 
@@ -29,8 +30,10 @@ if __name__ == "__main__":
     model_filename, continue_training = parse_arguments()
 
     if continue_training:
+        print("Continuing previous training.")
         model = torch.load(model_filename)
     else:
+        print("Training from scratch.")
         config = configuration()
         model = GPT(config=config)
     model.summarize_parameters()
