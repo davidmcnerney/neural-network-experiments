@@ -16,7 +16,7 @@ from independent.gpt.running.train import train
 def parse_arguments() -> Tuple[str, str]:
     argument_parser = argparse.ArgumentParser("Train")
     argument_parser.add_argument("--model-file", type=str, required=True)
-    argument_parser.add_argument("--continue", type=bool, default=False, required=False, dest="continue_training")
+    argument_parser.add_argument("--continue", action=argparse.BooleanOptionalAction, dest="continue_training")
     args = argument_parser.parse_args()
     return args.model_file, args.continue_training
 
