@@ -106,7 +106,7 @@ class GPT(nn.Module):
         """
         logits = self(x)                                            # batch_size x seq_length x vocab_size
         last_logits = logits[:, -1, :]                              # batch_size x vocab_size
-        generation.top_p(last_logits, 0.75)
+        generation.top_p(last_logits, 0.95)
         probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size  (dim=-1 normalizes values in the last dimension, i.e. vocab_size)
         next_indices = torch.multinomial(probs, num_samples=1)      # batch_size x 1
         return next_indices
