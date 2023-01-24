@@ -29,7 +29,7 @@ if __name__ == "__main__":
     device = get_device()
 
     completion = generate(
-        model=torch.load(model_filename),
+        model=torch.load(model_filename, map_location=device),
         vocabulary_by_token=load_vocabulary_from_file("/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json"),
         merge_list=load_merge_list_from_file("/Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe"),
         prompt=prompt,
