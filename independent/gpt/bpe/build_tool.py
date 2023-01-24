@@ -5,7 +5,7 @@ from independent.gpt.bpe import input_output
 
 
 # Usage:
-#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/build_tool.py --input-file ~/Temp/gpt/bpe/tinyshakespeare.txt --count-merges 5000 --output-vocab-file ~/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json --output-merge-file ~/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe
+#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/build_tool.py --input-file ~/Temp/gpt/bpe/tiny_shakespeare.txt --count-merges 5000 --output-vocab-file ~/Temp/gpt/bpe/tiny_shakespeare.5000.vocab.json --output-merge-file ~/Temp/gpt/bpe/tiny_shakespeare.5000.merge.bpe
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from independent.gpt.bpe import type_definitions
 
 
 # Usage:
-#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/invert_vocab_tool.py --input-vocab-file ~/Temp/gpt/bpe/tinyshakespeare.10000.vocab.inverted.json --output-vocab-file ~/Temp/gpt/bpe/tinyshakespeare.10000.vocab.json
+#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/invert_vocab_tool.py --input-vocab-file ~/Temp/gpt/bpe/tiny_shakespeare.10000.vocab.inverted.json --output-vocab-file ~/Temp/gpt/bpe/tiny_shakespeare.10000.vocab.json
 
 
 if __name__ == "__main__":

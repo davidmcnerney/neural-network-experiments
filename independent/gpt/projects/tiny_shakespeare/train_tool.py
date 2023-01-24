@@ -10,7 +10,7 @@ from independent.gpt.running.train import train
 
 
 # Usage:
-#   PYTHONPATH=.  pipenv run python independent/gpt/projects/tiny_shakespeare/train_tool.py --corpus-file /Users/dave/Temp/gpt/bpe/tinyshakespeare.txt --vocab-file /Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json --merge-file /Users/dave/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe --model-file /Users/dave/Temp/gpt/models/tinyshakespeare.model
+#   PYTHONPATH=.  pipenv run python independent/gpt/projects/tiny_shakespeare/train_tool.py --corpus-file /Users/dave/Temp/gpt/bpe/tiny_shakespeare.txt --vocab-file /Users/dave/Temp/gpt/bpe/tiny_shakespeare.5000.vocab.json --merge-file /Users/dave/Temp/gpt/bpe/tiny_shakespeare.5000.merge.bpe --model-file /Users/dave/Temp/gpt/models/tiny_shakespeare.model
 
 
 def parse_arguments() -> Tuple[str, str, str, str, str]:

@@ -5,7 +5,7 @@ from independent.gpt.bpe import tokenizer
 
 
 # Usage:
-#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/tokenize_tool.py --input-file ~/Temp/gpt/bpe/tinyshakespeare.txt --vocab-file ~/Temp/gpt/bpe/tinyshakespeare.5000.vocab.json --merge-file ~/Temp/gpt/bpe/tinyshakespeare.5000.merge.bpe --output-file ~/Temp/gpt/bpe/tinyshakespeare.encoded_5000.txt
+#   PYTHONPATH=.  pipenv run python independent/gpt/bpe/tokenize_tool.py --input-file ~/Temp/gpt/bpe/tiny_shakespeare.txt --vocab-file ~/Temp/gpt/bpe/tiny_shakespeare.5000.vocab.json --merge-file ~/Temp/gpt/bpe/tiny_shakespeare.5000.merge.bpe --output-file ~/Temp/gpt/bpe/tiny_shakespeare.encoded_5000.txt
 
 
 if __name__ == "__main__":

@@ -2,9 +2,9 @@
 
 set -e
 
-CORPUS_FILENAME=~/project/resources/tinyshakespeare.txt
-VOCAB_FILENAME=~/project/resources/tinyshakespeare.5000.vocab.json
-MERGE_FILENAME=~/project/resources/tinyshakespeare.5000.merge.bpe
+CORPUS_FILENAME=~/project/resources/tiny_shakespeare.txt
+VOCAB_FILENAME=~/project/resources/tiny_shakespeare.5000.vocab.json
+MERGE_FILENAME=~/project/resources/tiny_shakespeare.5000.merge.bpe
 MODEL_FILENAME=~/project/tiny_shakespeare.model
 
 cd ~/project/code/
