@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 
 import torch
 from torch import nn
@@ -81,22 +82,20 @@ class GPT(nn.Module):
         flattened_targets = targets.view(-1)                    # (batch_size*seq_length)
         return F.cross_entropy(flattened_logits, flattened_targets, ignore_index=-1)   # do I need ignore_index -1 here?
 
-    def generate(self, x: torch.Tensor, max_output_tokens: int) -> torch.Tensor:
+    def generate(self, x: torch.Tensor, max_output_tokens: int, top_p: Optional[float] = 1.0) -> torch.Tensor:
         """
-        input: token indices - batch_size x seq_length
-            this corresponds to input bodies of text
+        input: token indices: batch_size x seq_length
+            these are input prompts
         output: tensor of token indices: batch_size x seq_length+max_output_tokens
-            this corresponds to input bodies of text, completed
-
-        TODO: support temperature, top_k
+            these are the prompts, with completions appended
         """
         for _ in range (max_output_tokens):
             x_cropped = self._trim_sequence_to_block_size(x)
-            next_indices = self.sample(x_cropped)
+            next_indices = self.sample(x_cropped, top_p=top_p)
             x = torch.cat((x, next_indices), dim=1)                 # batch_size x seq_length++
         return x
 
-    def sample(self, x: torch.Tensor) -> torch.Tensor:
+    def sample(self, x: torch.Tensor, top_p: Optional[float] = 1.0) -> torch.Tensor:
         """
         input: token indices: batch_size x seq_length
             (seq_length must be <= block_size)
@@ -106,7 +105,7 @@ class GPT(nn.Module):
         """
         logits = self(x)                                            # batch_size x seq_length x vocab_size
         last_logits = logits[:, -1, :]                              # batch_size x vocab_size
-        generation.top_p(last_logits, 0.95)
+        generation.top_p(last_logits, top_p)
         probs = F.softmax(last_logits, dim=-1)                      # batch_size x vocab_size  (dim=-1 normalizes values in the last dimension, i.e. vocab_size)
         next_indices = torch.multinomial(probs, num_samples=1)      # batch_size x 1
         return next_indices

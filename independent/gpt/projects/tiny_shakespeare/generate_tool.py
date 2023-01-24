@@ -37,5 +37,6 @@ if __name__ == "__main__":
         prompt=prompt,
         max_output_tokens=1000,
         device=device,
+        top_p=0.95,
     )
     print(completion)
