@@ -1,4 +1,5 @@
 import statistics
+from time import time
 from typing import List, Optional, Set, Tuple
 
 import torch
@@ -36,6 +37,7 @@ def train(
 
     for epoch_num in range(model.config.count_epochs):
         print(f"Epoch {epoch_num} ", end="")
+        start_time = time()
 
         # Train
         model.train()
@@ -72,7 +74,8 @@ def train(
                     break
 
         # Checkpoint
-        print(f" training loss {statistics.mean(epoch_training_losses)} validation loss {statistics.mean(epoch_validation_losses)}")
+        elapsed_time = time() - start_time
+        print(f" training loss {statistics.mean(epoch_training_losses):.4f} validation loss {statistics.mean(epoch_validation_losses):.4f} {elapsed_time:.1f}s")
         if model_save_filename is not None:
             torch.save(model, model_save_filename)
 

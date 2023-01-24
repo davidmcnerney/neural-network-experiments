@@ -8,4 +8,4 @@ MERGE_FILENAME=~/project/resources/tiny_shakespeare.5000.merge.bpe
 MODEL_FILENAME=~/project/tiny_shakespeare.model
 
 cd ~/project/code/
-PYTHONPATH=.  python independent/gpt/projects/tiny_shakespeare/train_tool.py --corpus-file "$CORPUS_FILENAME" --vocab-file "$VOCAB_FILENAME" --merge-file "$MERGE_FILENAME" --model-file "$MODEL_FILENAME"
+PYTHONPATH=.  python independent/gpt/projects/tiny_shakespeare/train_tool.py --corpus-file "$CORPUS_FILENAME" --vocab-file "$VOCAB_FILENAME" --merge-file "$MERGE_FILENAME" --model-file "$MODEL_FILENAME" "$@"
