@@ -19,3 +19,23 @@ def top_p(
     sorted_inclusion_status[..., 0] = True   # always retain highest-probability element
     inclusion_status = torch.gather(sorted_inclusion_status, -1, sorted_indices.argsort(-1))
     logits[~inclusion_status] = -float("inf")
+
+
+def min_p(
+        logits: torch.Tensor,
+        min_p: float,
+) -> None:
+    """
+    Sets less probable elements of logits to -inf, such that the remaining elements have softmax probabilities
+    above the provided threshold. Always retains at least the highest-probability element.
+    Operates across the last dimension. Commonly, a 2 or 3 dimensional logits tensor will be passed, e.g.:
+    batch size x sequence length x vocab size.
+
+    This did not work so well.
+    """
+    sorted_logits, sorted_indices = torch.sort(logits, dim=-1, descending=True)
+    softmax_sorted_logits = F.softmax(sorted_logits, dim=-1)
+    sorted_inclusion_status = softmax_sorted_logits >= min_p
+    sorted_inclusion_status[..., 0] = True   # always retain highest-probability element
+    inclusion_status = torch.gather(sorted_inclusion_status, -1, sorted_indices.argsort(-1))
+    logits[~inclusion_status] = -float("inf")
