@@ -51,8 +51,6 @@ class Configuration:
         self.weight_decay = weight_decay
         self.grad_norm_clip = grad_norm_clip
 
-    # TODO: revisit all these parameters
-
     @classmethod
     def for_tests(cls) -> "Configuration":
         return cls(
