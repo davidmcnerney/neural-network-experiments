@@ -1,3 +1,4 @@
+import random
 from typing import List, Tuple
 
 import torch
@@ -35,6 +36,7 @@ class InMemoryTokenDataset(Dataset):
             merge_filename: str,
             block_size: int,
             device: torch.device,
+            mix_training_and_validation: bool = True,
     ) -> Tuple["InMemoryTokenDataset", "InMemoryTokenDataset"]:
         """
         Returns training (90%) and validation (10%) datasets.
@@ -43,6 +45,8 @@ class InMemoryTokenDataset(Dataset):
             input_text = file.read()
         tokens = cls._tokenize(input_text, vocab_filename, merge_filename)
         blocks = cls._divide_tokens_into_blocks(tokens, block_size)
+        if mix_training_and_validation:
+            random.shuffle(blocks)
         count_training_blocks, count_validation_blocks = cls._divide_blocks(len(blocks))
         return (
             cls(blocks=blocks[:count_training_blocks], block_size=block_size, device=device),

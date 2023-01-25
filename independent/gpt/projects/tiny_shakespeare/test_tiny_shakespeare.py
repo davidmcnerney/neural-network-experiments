@@ -18,6 +18,7 @@ def test_dataset():
         merge_filename=fixture_loader.path_to_file("merges.bpe"),
         block_size=8,
         device=torch.device("cpu"),
+        mix_training_and_validation=False,  # so that we know which blocks will be first for validation
     )
 
     # 311 tokens -> 38 blocks -> 3 validation blocks, 35 training blocks
