@@ -10,29 +10,22 @@ from independent.gpt.bpe import tokenizer
 class InMemoryTokenDataset(Dataset):
     def __init__(
             self,
-            tokens: List[int],
+            blocks: List[List[int]],  # to contain block_size + 1 elements, so we can source X and Y token lists both
             block_size: int,
             device: torch.device,
     ):
-        self.tokens = tokens
+        self.blocks = blocks
         self.block_size = block_size
         self.device = device
 
     def __getitem__(self, item):
-        x = self.tokens[item:(item + self.block_size)]
-        y = self.tokens[(item + 1):(item + 1 + self.block_size)]
+        block = self.blocks[item]
+        x = block[:self.block_size]
+        y = block[1:]
         return torch.tensor(x, device=self.device), torch.tensor(y, device=self.device)
 
     def __len__(self):
-        # For each sample that we return, we need an X sequence and a Y sequence. Each element of Y is just
-        # the index + 1 position token from X. For example:
-        #       len(tokens) 4
-        #       block_size  3
-        #       available samples: only 1
-        #           X will be indices 0, 1 and 2
-        #           Y will be indices 1, 2 and 3
-        count_available_blocks = len(self.tokens) - self.block_size + 1 - 1
-        return max(count_available_blocks, 0)
+        return len(self.blocks)
 
     @classmethod
     def load(
@@ -49,10 +42,11 @@ class InMemoryTokenDataset(Dataset):
         with open(filename) as file:
             input_text = file.read()
         tokens = cls._tokenize(input_text, vocab_filename, merge_filename)
-        count_training_tokens, count_validation_tokens = cls._divide_tokens(len(tokens))
+        blocks = cls._divide_tokens_into_blocks(tokens, block_size)
+        count_training_blocks, count_validation_blocks = cls._divide_blocks(len(blocks))
         return (
-            cls(tokens=tokens[:count_training_tokens], block_size=block_size, device=device),
-            cls(tokens=tokens[-count_validation_tokens:], block_size=block_size, device=device),
+            cls(blocks=blocks[:count_training_blocks], block_size=block_size, device=device),
+            cls(blocks=blocks[-count_validation_blocks:], block_size=block_size, device=device),
         )
 
     @staticmethod
@@ -66,17 +60,26 @@ class InMemoryTokenDataset(Dataset):
         return tokenizer.tokenize(input_text, vocab, merges)
 
     @staticmethod
-    def _divide_tokens(count_tokens: int) -> Tuple[int, int]:
+    def _divide_tokens_into_blocks(tokens: List[int], block_size: int) -> List[List[int]]:
+        count_blocks = (len(tokens) - 1) // block_size  # extra 1 to accommodate Y values
+        blocks: List[List[int]] = []
+        for block_num in range(count_blocks):
+            start_index = block_num * block_size
+            block = tokens[start_index:start_index + block_size + 1]  # extra 1 to accommodate Y values
+            blocks.append(block)
+        return blocks
+
+    @staticmethod
+    def _divide_blocks(count_blocks: int) -> Tuple[int, int]:
         """
-        Divides tokens into training and validation portions.
-        This algorithm doesn't take block size into account, and maybe should.
+        Divides a block count into training and validation portions.
         """
-        if count_tokens == 0:
+        if count_blocks == 0:
             return 0, 0
-        elif count_tokens == 1:
+        elif count_blocks == 1:
             return 1, 0
-        elif count_tokens <= 10:
-            return count_tokens - 1, 1
+        elif count_blocks <= 10:
+            return count_blocks - 1, 1
         else:
-            count_validation_tokens = round(0.1 * count_tokens)
-            return count_tokens - count_validation_tokens, count_validation_tokens
+            count_validation_blocks = round(0.1 * count_blocks)
+            return count_blocks - count_validation_blocks, count_validation_blocks

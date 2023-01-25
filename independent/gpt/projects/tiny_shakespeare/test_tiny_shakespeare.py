@@ -20,15 +20,19 @@ def test_dataset():
         device=torch.device("cpu"),
     )
 
-    assert len(training_dataset) == 280 - 8
+    # 311 tokens -> 38 blocks -> 3 validation blocks, 35 training blocks
+
+    # Training dataset first block begins at first token in encoded.txt
+    assert len(training_dataset) == 34
     x, y = training_dataset[0]
     assert torch.equal(x, torch.tensor([684, 1244, 58, 10, 2562, 342, 3023, 2598]))  # these are from encoded.txt
     assert torch.equal(y, torch.tensor([1244, 58, 10, 2562, 342, 3023, 2598, 2524]))
 
-    assert len(validation_dataset) == (311 - 280) - 8
+    # Validation dataset first block begins at token 8 * 34 + 1 = 273rd token
+    assert len(validation_dataset) == 4
     x, y = validation_dataset[0]
-    assert torch.equal(x, torch.tensor([2440, 623, 329, 115, 58, 327, 267, 1722]))
-    assert torch.equal(y, torch.tensor([623, 329, 115, 58, 327, 267, 1722, 2197]))
+    assert torch.equal(x, torch.tensor([10, 382, 289, 1046, 115, 44, 1371, 342]))
+    assert torch.equal(y, torch.tensor([382, 289, 1046, 115, 44, 1371, 342, 2440]))
 
 
 def test_dataset_and_train():
