@@ -21,7 +21,7 @@ def configuration() -> Configuration:
         training_iterations_per_epoch=150,
         validation_iterations_per_epoch=25,
         batch_size=64,
-        learning_rate=1e-3,
+        learning_rate=1e-4,
         weight_decay=0.2,
         grad_norm_clip=1.0,
     )
