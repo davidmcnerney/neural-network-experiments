@@ -36,7 +36,7 @@ class InMemoryTokenDataset(Dataset):
             merge_filename: str,
             block_size: int,
             device: torch.device,
-            mix_training_and_validation: bool = True,
+            mix_training_and_validation: bool = True,   # set to False by some tests
     ) -> Tuple["InMemoryTokenDataset", "InMemoryTokenDataset"]:
         """
         Returns training (90%) and validation (10%) datasets.
