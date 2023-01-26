@@ -81,7 +81,7 @@ def train(
 
         # Checkpoint
         elapsed_time = time() - start_time
-        print(f" training loss {statistics.mean(epoch_training_losses):.4f} validation loss {statistics.mean(epoch_validation_losses):.4f} {elapsed_time:.1f}s")
+        print(f" training loss {statistics.mean(epoch_training_losses):.4f} validation loss {statistics.mean(epoch_validation_losses):.4f} iter {model.training_iteration_num} {elapsed_time:.1f}s")
         if model_save_filename is not None:
             torch.save(model, model_save_filename)
 
