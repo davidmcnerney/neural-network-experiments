@@ -37,7 +37,7 @@ def train(
         batch_size=model.config.batch_size,
     )
 
-    for epoch_num in range(model.config.count_epochs):
+    for epoch_num in range(1, model.config.count_epochs + 1):
         print(f"Epoch {epoch_num} ", end="")
         start_time = time()
 
