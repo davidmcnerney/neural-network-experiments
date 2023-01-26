@@ -1,3 +1,4 @@
+import math
 import statistics
 from time import time
 from typing import List, Optional, Set, Tuple
@@ -9,6 +10,7 @@ import torch.optim
 import torch.utils.data
 
 from gpt.model.gpt import GPT
+from gpt.running.configuration import Configuration
 
 
 def train(
@@ -42,20 +44,24 @@ def train(
         # Train
         model.train()
         epoch_training_losses: List[float] = []
-        count_training_iterations = 0
+        count_training_iterations_this_epoch = 0
         for batch in iter(training_loader):
+            model.training_iteration_num += 1
+
             x, y = batch                                    # both tensors containing token indices, batch size x seq length
             logits = model(x)                               # batch size x seq length x vocab size
             loss = model.calculate_loss(logits, y)
             model.zero_grad(set_to_none=True)
             loss.backward()
             # TODO: add gradient clipping?
+            _set_learning_rate(model.config, optimizer, model.training_iteration_num)
             optimizer.step()
+
             epoch_training_losses.append(loss.item())
             _output_progress_dot()
 
-            count_training_iterations += 1
-            if count_training_iterations > model.config.training_iterations_per_epoch:
+            count_training_iterations_this_epoch += 1
+            if count_training_iterations_this_epoch >= model.config.training_iterations_per_epoch:
                 break
 
         # Validate
@@ -92,7 +98,11 @@ def _get_optimizer(model: GPT) -> torch.optim.Optimizer:
         {"params": parameters_requiring_weight_decay, "weight_decay": model.config.weight_decay},
         {"params": parameters_not_requiring_weight_decay, "weight_decay": 0.0},
     ]
-    return torch.optim.AdamW(groups, lr=model.config.learning_rate)
+    return torch.optim.AdamW(
+        groups,
+        lr=model.config.learning_rate,
+        betas=(model.config.adam_beta_1, model.config.adam_beta_2),
+    )
 
 
 def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tensor], List[torch.Tensor]]:
@@ -145,6 +155,53 @@ def _parameters_by_weight_decay_requirement(model: GPT) -> Tuple[List[torch.Tens
     ]
 
     return requiring_weight_decay, not_requiring_weight_decay
+
+
+#
+# Learning rate warmup & decay
+#
+
+
+def _set_learning_rate(config: Configuration, optimizer: torch.optim.Optimizer, iteration_num: int) -> None:
+    if _use_dynamic_learning_rate(config):
+        learning_rate = get_dynamic_learning_rate(config, iteration_num)
+        for parameter_group in optimizer.param_groups:
+            parameter_group["lr"] = learning_rate
+        # print(f"Learning rate: {learning_rate:.2E}")
+
+
+def _use_dynamic_learning_rate(config: Configuration) -> bool:
+    return config.count_warmup_iterations is not None or config.count_decay_iterations is not None
+
+
+def get_dynamic_learning_rate(config: Configuration, iteration_num: int) -> float:
+    if config.count_warmup_iterations is not None and iteration_num <= config.count_warmup_iterations:
+        # Warmup period - we slowly increase learning rate to its standard value
+        return (iteration_num / config.count_warmup_iterations) * config.learning_rate
+    elif config.count_decay_iterations is not None:
+        assert config.decayed_learning_rate is not None
+        decay_starts_at_iteration = config.count_warmup_iterations + 1 if config.count_warmup_iterations is not None else 1
+        decay_ends_at_iteration = decay_starts_at_iteration + config.count_decay_iterations - 1
+        if iteration_num < decay_starts_at_iteration:
+            raise Exception("did not expect to get here")
+        elif iteration_num < decay_ends_at_iteration:
+            # Decay period - we slowly decrease learning rate from its standard value to the decayed value
+            decay_progress = (iteration_num - decay_starts_at_iteration) / config.count_decay_iterations
+            assert 0.0 <= decay_progress <= 1.0
+            portion_to_add = 0.5 * (1.0 + math.cos(math.pi * decay_progress)) # ranges 1.0 to 0.0
+            assert 0.0 <= portion_to_add <= 1.0
+            additional_learning_rate = config.learning_rate - config.decayed_learning_rate
+            return config.decayed_learning_rate + portion_to_add * additional_learning_rate
+        else:
+            # Decay complete
+            return config.decayed_learning_rate
+    else:
+        return config.learning_rate
+
+
+#
+# Status outputs
+#
 
 
 def _summarize_set(description: str, input_set: Set):

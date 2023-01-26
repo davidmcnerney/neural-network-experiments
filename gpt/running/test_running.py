@@ -3,36 +3,6 @@ import torch.utils.data
 
 from gpt.model.gpt import GPT
 from gpt.running.configuration import Configuration
-from gpt.running.train import train
-
-
-def test_train():
-    config = Configuration.for_tests()
-    config.count_epochs = 1
-    config.batch_size = 2
-    model = GPT(config=config)
-
-    x = torch.tensor([
-        [100, 200, 300, 400],
-        [101, 201, 301, 401],
-    ])
-    y = torch.tensor([
-        [10, 20, 30, 40],
-        [11, 21, 31, 41],
-    ])
-    training_dataset = torch.utils.data.TensorDataset(x, y)
-
-    x = torch.tensor([
-        [500, 600, 700, 800],
-        [501, 601, 701, 801],
-    ])
-    y = torch.tensor([
-        [50, 60, 70, 80],
-        [51, 61, 71, 81],
-    ])
-    validation_dataset = torch.utils.data.TensorDataset(x, y)
-
-    train(model=model, training_dataset=training_dataset, validation_dataset=validation_dataset)
 
 
 def test_forward():

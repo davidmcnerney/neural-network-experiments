@@ -15,6 +15,7 @@ class GPT(nn.Module):
         super().__init__()
 
         self.config = config
+        self.training_iteration_num = 0   # used to persist what iteration we are at in training
 
         # Set up our neural network: embedding, transformer layers, and final projection.
         # Question: Do we get any benefit from using ModuleDict here, as opposed to making each thing
