@@ -1,0 +1,1 @@
+PYTHONPATH=.  pipenv run pytest gpt/
